@@ -1,0 +1,275 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+// ─── Identity & auth ───────────────────────────────────────────────
+
+enum UserRole {
+  CUSTOMER
+  OWNER
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING_EMAIL_VERIFICATION
+  ACTIVE
+  SUSPENDED
+}
+
+// ─── Café & layout ─────────────────────────────────────────────────
+
+enum CafeStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum SeatType {
+  STANDARD
+  PREMIUM
+  GROUP
+}
+
+// ─── Booking lifecycle ─────────────────────────────────────────────
+
+enum BookingStatus {
+  CONFIRMED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+// ─── Notifications ─────────────────────────────────────────────────
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  IN_APP
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMATION
+  BOOKING_REMINDER
+  BOOKING_CANCELLATION
+  BOOKING_EXPIRED
+  EMAIL_VERIFICATION
+  ACCOUNT_SUSPENDED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+
+model User {
+  id                  String            @id @default(uuid()) @db.Uuid
+  email               String            @unique
+  passwordHash        String            @map("password_hash")
+  role                UserRole
+  status              UserStatus        @default(PENDING_EMAIL_VERIFICATION)
+  fullName            String            @map("full_name")
+  phone               String?
+  emailVerifiedAt     DateTime?         @map("email_verified_at")
+  failedLoginAttempts Int               @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime?         @map("locked_until")
+  suspendedAt         DateTime?         @map("suspended_at")
+  suspensionReason    String?           @map("suspension_reason")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+  deletedAt           DateTime?         @map("deleted_at")
+
+  customerProfile     CustomerProfile?
+  ownedCafes          Cafe[]            @relation("CafeOwner")
+  bookings            Booking[]         @relation("CustomerBookings")
+  notificationLogs    NotificationLog[]
+  auditLogs           AuditLog[]        @relation("AuditActor")
+  bookingHistoryEdits BookingHistory[]  @relation("BookingHistoryChangedBy")
+
+  @@map("users")
+}
+
+model CustomerProfile {
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @unique @map("user_id") @db.Uuid
+  preferredCity      String?  @map("preferred_city")
+  emailNotifications Boolean  @default(true) @map("email_notifications")
+  smsNotifications   Boolean  @default(false) @map("sms_notifications")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("customer_profiles")
+}
+
+model Cafe {
+  id                          String     @id @default(uuid()) @db.Uuid
+  ownerId                     String     @map("owner_id") @db.Uuid
+  name                        String
+  slug                        String     @unique
+  description                 String?
+  address                     String
+  city                        String
+  phone                       String?
+  email                       String?
+  status                      CafeStatus @default(PENDING_VERIFICATION)
+  rejectionReason             String?    @map("rejection_reason")
+  operatingHours              Json       @map("operating_hours")
+  amenities                   Json       @default("[]")
+  slotDurationMinutes         Int        @default(120) @map("slot_duration_minutes")
+  minAdvanceBookingMinutes    Int        @default(15) @map("min_advance_booking_minutes")
+  maxAdvanceBookingDays       Int        @default(30) @map("max_advance_booking_days")
+  cancellationDeadlineMinutes Int        @default(60) @map("cancellation_deadline_minutes")
+  maxConcurrentBookings       Int        @default(3) @map("max_concurrent_bookings")
+  checkinGraceMinutes         Int        @default(15) @map("checkin_grace_minutes")
+  timezone                    String     @default("Asia/Ho_Chi_Minh")
+  approvedAt                  DateTime?  @map("approved_at")
+  createdAt                   DateTime   @default(now()) @map("created_at")
+  updatedAt                   DateTime   @updatedAt @map("updated_at")
+
+  owner    User      @relation("CafeOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  zones    Zone[]
+  bookings Booking[]
+
+  @@index([ownerId])
+  @@index([city, status])
+  @@map("cafes")
+}
+
+model Zone {
+  id           String    @id @default(uuid()) @db.Uuid
+  cafeId       String    @map("cafe_id") @db.Uuid
+  name         String
+  displayOrder Int       @default(0) @map("display_order")
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  cafe  Cafe   @relation(fields: [cafeId], references: [id], onDelete: Restrict)
+  seats Seat[]
+
+  @@index([cafeId])
+  @@map("zones")
+}
+
+model Seat {
+  id         String    @id @default(uuid()) @db.Uuid
+  zoneId     String    @map("zone_id") @db.Uuid
+  seatNumber String    @map("seat_number")
+  seatType   SeatType  @default(STANDARD) @map("seat_type")
+  amenities  Json      @default("[]")
+  isActive   Boolean   @default(true) @map("is_active")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  zone     Zone      @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  bookings Booking[]
+
+  @@index([zoneId])
+  @@map("seats")
+}
+
+model Booking {
+  id                 String        @id @default(uuid()) @db.Uuid
+  confirmationNumber String        @unique @map("confirmation_number")
+  customerId         String        @map("customer_id") @db.Uuid
+  seatId             String        @map("seat_id") @db.Uuid
+  cafeId             String        @map("cafe_id") @db.Uuid
+  startTime          DateTime      @map("start_time")
+  endTime            DateTime      @map("end_time")
+  status             BookingStatus @default(CONFIRMED)
+  notes              String?
+  checkedInAt        DateTime?     @map("checked_in_at")
+  cancelledAt        DateTime?     @map("cancelled_at")
+  cancellationReason String?       @map("cancellation_reason")
+  expiredAt          DateTime?     @map("expired_at")
+  completedAt        DateTime?     @map("completed_at")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  customer         User              @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Restrict)
+  seat             Seat              @relation(fields: [seatId], references: [id], onDelete: Restrict)
+  cafe             Cafe              @relation(fields: [cafeId], references: [id], onDelete: Restrict)
+  bookingHistory   BookingHistory[]
+  notificationLogs NotificationLog[]
+
+  @@index([seatId, startTime, endTime])
+  @@index([cafeId, startTime])
+  @@index([customerId, status, startTime(sort: Desc)])
+  @@map("bookings")
+}
+
+model BookingHistory {
+  id          String         @id @default(uuid()) @db.Uuid
+  bookingId   String         @map("booking_id") @db.Uuid
+  fromStatus  BookingStatus? @map("from_status")
+  toStatus    BookingStatus  @map("to_status")
+  reason      String?
+  changedById String?        @map("changed_by_id") @db.Uuid
+  metadata    Json?
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  changedBy User?   @relation("BookingHistoryChangedBy", fields: [changedById], references: [id], onDelete: SetNull)
+
+  @@index([bookingId, createdAt])
+  @@map("booking_history")
+}
+
+model NotificationLog {
+  id           String             @id @default(uuid()) @db.Uuid
+  userId       String             @map("user_id") @db.Uuid
+  bookingId    String?            @map("booking_id") @db.Uuid
+  channel      NotificationChannel
+  type         NotificationType
+  status       NotificationStatus @default(PENDING)
+  recipient    String
+  errorMessage String?            @map("error_message")
+  sentAt       DateTime?          @map("sent_at")
+  createdAt    DateTime           @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([bookingId, type])
+  @@map("notification_logs")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  actorId      String?  @map("actor_id") @db.Uuid
+  action       String
+  resourceType String   @map("resource_type")
+  resourceId   String   @map("resource_id") @db.Uuid
+  changes      Json?
+  ipAddress    String?  @map("ip_address")
+  requestId    String?  @map("request_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([resourceType, resourceId, createdAt])
+  @@index([actorId, createdAt(sort: Desc)])
+  @@map("audit_logs")
+}
