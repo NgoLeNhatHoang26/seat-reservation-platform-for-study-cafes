@@ -45,10 +45,14 @@ It describes the structural decomposition of the platform — layers, modules, i
 
 | Topic | Document |
 |-------|----------|
-| Use cases & business rules | `USE_CASES.md` |
-| Cache, queue, logging, security, deployment details | `PRODUCTION_DESIGN_DOCUMENT.md` |
-| API specification | `API.md` *(planned)* |
-| Database schema | `DATABASE.md` *(planned)* |
+| Use cases & business rules | [USE_CASES.md](./USE_CASES.md) |
+| Cache design | [CACHE-DESIGN.md](./CACHE-DESIGN.md) |
+| Queue design | [QUEUE-DESIGN.md](./QUEUE-DESIGN.md) |
+| Concurrency | [CONCURRENCY-DESIGN.md](./CONCURRENCY-DESIGN.md) |
+| API specification | [API-SPECIFICATION.md](./API-SPECIFICATION.md) |
+| Database schema | [DATABASE-DESIGN.md](./DATABASE-DESIGN.md) |
+| Overview index | [SYSTEM-OVERVIEW.md](./SYSTEM-OVERVIEW.md) |
+| Backend overview (short) | [BACKEND-OVERVIEW.md](./BACKEND-OVERVIEW.md) |
 
 ---
 
@@ -309,7 +313,7 @@ All external calls are made **asynchronously** via BullMQ workers so API respons
 
 ## 8. Design Decisions (Summary)
 
-Architectural choices and their rationale at a glance. Implementation details (locking strategy, cache TTLs, retry policies) are documented in `PRODUCTION_DESIGN_DOCUMENT.md`.
+Architectural choices and their rationale at a glance. Implementation details (locking strategy, cache TTLs, retry policies) are documented in [CONCURRENCY-DESIGN.md](./CONCURRENCY-DESIGN.md), [CACHE-DESIGN.md](./CACHE-DESIGN.md), and [QUEUE-DESIGN.md](./QUEUE-DESIGN.md).
 
 | # | Decision | Chosen Option | Rationale |
 |---|----------|---------------|-----------|
