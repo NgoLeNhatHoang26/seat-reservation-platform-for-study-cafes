@@ -1,5 +1,5 @@
 import { prisma } from '../../config/prisma';
-import type { CustomerProfile, Prisma, User } from '../../generated/prisma/client';
+import type { CustomerProfile, OwnerProfile, Prisma, User } from '../../generated/prisma/client';
 import { UserRole, UserStatus } from '../../generated/prisma/enums';
 
 export type CreateUserWithProfileData = {
@@ -10,28 +10,35 @@ export type CreateUserWithProfileData = {
   preferredCity?: string;
 };
 
-export type CreateOwnerUserData = {
+export type CreateOwnerWithProfileData = {
   email: string;
   passwordHash: string;
   fullName: string;
-  phone: string;
+  phone?: string;
+  businessLicenseUrl: string;
+  idCardUrl: string;
 };
 
 export type UserWithProfile = User & {
   customerProfile: CustomerProfile | null;
+  ownerProfile: OwnerProfile | null;
 };
 
 /** Tìm user theo email, chỉ lấy bản ghi chưa bị soft-delete. */
-export async function findUserByEmail(email: string): Promise<User | null> {
+export async function findUserByEmail(email: string): Promise<UserWithProfile | null> {
   return prisma.user.findFirst({
     where: {
       email,
       deletedAt: null,
     },
+    include: {
+      customerProfile: true,
+      ownerProfile: true,
+    },
   });
 }
 
-/** Tìm user theo ID, kèm customer profile (dùng cho GET /auth/me). */
+/** Tìm user theo ID, kèm customer/owner profile (dùng cho GET /auth/me). */
 export async function findUserById(id: string): Promise<UserWithProfile | null> {
   return prisma.user.findFirst({
     where: {
@@ -40,6 +47,7 @@ export async function findUserById(id: string): Promise<UserWithProfile | null> 
     },
     include: {
       customerProfile: true,
+      ownerProfile: true,
     },
   });
 }
@@ -59,7 +67,8 @@ export async function createUserWithProfile(
         fullName: data.fullName,
         phone: data.phone,
         role: UserRole.CUSTOMER,
-        status: UserStatus.PENDING_EMAIL_VERIFICATION,
+        status: UserStatus.ACTIVE,
+        emailVerifiedAt: new Date(),
       },
     });
 
@@ -83,17 +92,43 @@ export async function createUserWithProfile(
   });
 }
 
-/** Tạo user với role OWNER (dùng cho register-owner, chưa tạo café ở đây). */
-export async function createOwnerUser(data: CreateOwnerUserData): Promise<User> {
-  return prisma.user.create({
-    data: {
-      email: data.email,
-      passwordHash: data.passwordHash,
-      fullName: data.fullName,
-      phone: data.phone,
-      role: UserRole.OWNER,
-      status: UserStatus.PENDING_EMAIL_VERIFICATION,
-    },
+/** Tạo OWNER + hồ sơ giấy tờ xác minh trong một transaction (register-owner). */
+export async function createOwnerWithProfile(
+  data: CreateOwnerWithProfileData,
+): Promise<{ user: User; profile: OwnerProfile }> {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const user = await tx.user.create({
+      data: {
+        email: data.email,
+        passwordHash: data.passwordHash,
+        fullName: data.fullName,
+        phone: data.phone,
+        role: UserRole.OWNER,
+        status: UserStatus.PENDING_EMAIL_VERIFICATION,
+      },
+    });
+
+    const profile = await tx.ownerProfile.create({
+      data: {
+        userId: user.id,
+        businessLicenseUrl: data.businessLicenseUrl,
+        idCardUrl: data.idCardUrl,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        actorId: user.id,
+        action: 'OWNER_REGISTERED',
+        resourceType: 'user',
+        resourceId: user.id,
+        changes: {
+          verificationStatus: profile.verificationStatus,
+        },
+      },
+    });
+
+    return { user, profile };
   });
 }
 
