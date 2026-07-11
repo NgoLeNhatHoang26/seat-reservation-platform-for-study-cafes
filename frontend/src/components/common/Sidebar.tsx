@@ -90,7 +90,7 @@ function SidebarNavList({
               <ListItemText
                 primary={item.label}
                 slotProps={{
-                  primary: { variant: 'body2', fontWeight: isActive ? 600 : 400 },
+                  primary: { variant: 'body2', sx: { fontWeight: isActive ? 600 : 400 } },
                 }}
               />
             )}

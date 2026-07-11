@@ -57,7 +57,6 @@ async function seedOwnerAndCafe() {
     },
   });
 
-  // Required for owner login (assertOwnerCanAuthenticate checks OwnerProfile)
   await prisma.ownerProfile.upsert({
     where: { userId: owner.id },
     update: {
@@ -120,13 +119,16 @@ async function seedOwnerAndCafe() {
     },
   });
 
-  // Clear old layout (dev seed only)
-  await prisma.seat.deleteMany({
+  const existingSeats = await prisma.seat.count({
     where: { zone: { cafeId: cafe.id } },
   });
-  await prisma.zone.deleteMany({
-    where: { cafeId: cafe.id },
-  });
+
+  if (existingSeats > 0) {
+    console.log(
+      `Cafe "${cafe.name}" already has ${existingSeats} seats — skipping layout reset.`,
+    );
+    return { owner, cafe };
+  }
 
   const zoneA = await prisma.zone.create({
     data: { cafeId: cafe.id, name: "Quiet Zone", displayOrder: 1 },

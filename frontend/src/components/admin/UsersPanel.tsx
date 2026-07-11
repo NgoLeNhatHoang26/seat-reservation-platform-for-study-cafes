@@ -65,7 +65,7 @@ export default function UsersPanel() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} gutterBottom>
+      <Typography variant="h5" sx={{ fontWeight: 700 }} gutterBottom>
         Người dùng
       </Typography>
 
@@ -141,7 +141,7 @@ export default function UsersPanel() {
                   }}
                 >
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="body1" fontWeight={600} noWrap>
+                    <Typography variant="body1" sx={{ fontWeight: 600 }} noWrap>
                       {user.fullName}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" noWrap>
@@ -152,7 +152,7 @@ export default function UsersPanel() {
                     </Typography>
                   </Box>
 
-                  <Stack direction="row" spacing={1} alignItems="center">
+                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                     <StatusChip status={user.status} />
                     <Tooltip title="Xem chi tiết">
                       <IconButton

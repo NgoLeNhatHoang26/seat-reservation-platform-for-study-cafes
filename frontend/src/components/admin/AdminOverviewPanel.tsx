@@ -28,7 +28,7 @@ export default function AdminOverviewPanel() {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} gutterBottom>
+      <Typography variant="h5" sx={{ fontWeight: 700 }} gutterBottom>
         Tổng quan
       </Typography>
 
@@ -37,7 +37,7 @@ export default function AdminOverviewPanel() {
           <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <FactCheckOutlinedIcon color="warning" sx={{ fontSize: 40 }} />
             <Box>
-              <Typography variant="h3" fontWeight={700} color="warning.main">
+              <Typography variant="h3" sx={{ fontWeight: 700 }} color="warning.main">
                 {pendingLoading ? '—' : pendingCount}
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -51,7 +51,7 @@ export default function AdminOverviewPanel() {
           <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <FactCheckOutlinedIcon color="warning" sx={{ fontSize: 40 }} />
             <Box>
-              <Typography variant="h3" fontWeight={700} color="warning.main">
+              <Typography variant="h3" sx={{ fontWeight: 700 }} color="warning.main">
                 {pendingOwnersLoading ? '—' : pendingOwnersCount}
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -66,7 +66,7 @@ export default function AdminOverviewPanel() {
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <PeopleOutlinedIcon color="primary" sx={{ fontSize: 40 }} />
               <Box>
-                <Typography variant="h3" fontWeight={700} color="primary">
+                <Typography variant="h3" sx={{ fontWeight: 700 }} color="primary">
                   {totalUsers}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -78,7 +78,7 @@ export default function AdminOverviewPanel() {
         )}
       </Stack>
 
-      <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600 }} gutterBottom>
         Café chờ duyệt gần nhất
       </Typography>
 
@@ -106,7 +106,7 @@ export default function AdminOverviewPanel() {
                 }}
               >
                 <Box>
-                  <Typography variant="body1" fontWeight={600}>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
                     {cafe.name}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">

@@ -6,5 +6,19 @@ const connection = {
     maxRetriesPerRequest: null as null,
 }
 
-export const bookingQueue = new Queue("booking", {connection});
-export const emailQueue = new Queue("email", {connection});
+const emailDefaultJobOptions = {
+    attempts: 3,
+    backoff: { type: 'exponential' as const, delay: 2_000 },
+};
+const bookingDefaultJobOptions = {
+    attempts: 3,
+    backoff: { type: 'exponential' as const, delay: 30_000 },
+  };
+export const bookingQueue = new Queue('booking', {
+    connection,
+    defaultJobOptions: bookingDefaultJobOptions,
+});
+export const emailQueue = new Queue("email", {
+    connection,
+    defaultJobOptions: emailDefaultJobOptions,
+});

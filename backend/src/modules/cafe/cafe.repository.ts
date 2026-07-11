@@ -9,7 +9,7 @@ type ListParams= {
 };
 
 type SearchParams = ListParams & {
-    amenities?: string[];   // ['wifi', 'parking']
+    amenities?: string[]; 
     startTime?: Date;
     endTime?: Date;
 };

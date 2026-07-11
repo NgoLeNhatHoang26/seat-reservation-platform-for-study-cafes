@@ -1,8 +1,9 @@
 import { axiosInstance } from './axiosInstance';
-import { normalizePaginated } from '../utils/pagination';
+import { normalizePaginated, type PaginatedData } from '../utils/pagination';
 import type {
   GetNotificationsParams,
   MarkReadResponse,
+  Notification,
   NotificationListResponse,
 } from '../types/notification.types';
 
@@ -10,7 +11,14 @@ export async function getNotifications(
   params: GetNotificationsParams = {},
 ): Promise<NotificationListResponse> {
   const { data } = await axiosInstance.get('/notifications', { params });
-  return normalizePaginated(data.data) as NotificationListResponse;
+  const normalized = normalizePaginated(data.data) as PaginatedData<Notification> & {
+    unreadCount?: number;
+  };
+  return {
+    items: normalized.items,
+    unreadCount: normalized.unreadCount ?? 0,
+    pagination: normalized.pagination,
+  };
 }
 
 export async function markNotificationRead(

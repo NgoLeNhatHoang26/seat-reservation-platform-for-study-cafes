@@ -2,9 +2,10 @@ import { Box, CircularProgress } from '@mui/material';
 
 interface LoadingSpinnerProps {
   fullPage?: boolean;
+  size?: number;
 }
 
-export default function LoadingSpinner({ fullPage = false }: LoadingSpinnerProps) {
+export default function LoadingSpinner({ fullPage = false, size }: LoadingSpinnerProps) {
   return (
     <Box
       sx={{
@@ -16,7 +17,7 @@ export default function LoadingSpinner({ fullPage = false }: LoadingSpinnerProps
           : { width: '100%', py: 8 }),
       }}
     >
-      <CircularProgress color="primary" />
+      <CircularProgress color="primary" {...(size !== undefined ? { size } : {})} />
     </Box>
   );
 }
