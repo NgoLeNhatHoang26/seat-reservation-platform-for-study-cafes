@@ -1,4 +1,14 @@
 import { z } from "zod";
+import { BookingStatus } from '../../generated/prisma/enums';
+
+export const listBookingsQuerySchema = z.object({
+  status: z.nativeEnum(BookingStatus).optional(),
+  upcoming: z.enum(['true', 'false']).optional(),
+  cafeId: z.string().uuid().optional(),
+  sort: z.enum(['-startTime', 'startTime']).optional(),
+  limit: z.string().optional(),
+  cursor: z.string().optional(),
+});
 
 export const createBookingSchema = z
   .object({
@@ -26,3 +36,5 @@ export const cancelBookingQuerySchema = z.object({
 });
 
 export const checkinBookingBodySchema = z.object({});
+
+export type ListBookingsQuery = z.infer<typeof listBookingsQuerySchema>;

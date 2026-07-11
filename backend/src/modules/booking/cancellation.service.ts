@@ -9,40 +9,9 @@ import * as cache from '../../common/cache';
 import * as cafeRepo from '../cafe/cafe.repository';
 import * as bookingRepo from './booking.repository';
 import * as bookingQueue from './booking-queue.service';
-import type { CancelBookingResponse, BookingItemResponse } from './booking.dto';
+import type { CancelBookingResponse } from './booking.dto';
 import type { Prisma } from '../../generated/prisma/client';
-
-function toBookingItemResponse(booking: {
-    id: string;
-    confirmationNumber: string;
-    customerId: string;
-    cafeId: string;
-    seatId: string;
-    startTime: Date;
-    endTime: Date;
-    status: BookingStatus;
-    notes: string | null;
-    checkedInAt: Date | null;
-    cancelledAt: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
-}): BookingItemResponse {
-    return {
-      id: booking.id,
-      confirmationNumber: booking.confirmationNumber,
-      customerId: booking.customerId,
-      cafeId: booking.cafeId,
-      seatId: booking.seatId,
-      startTime: booking.startTime.toISOString(),
-      endTime: booking.endTime.toISOString(),
-      status: booking.status,
-      notes: booking.notes,
-      checkedInAt: booking.checkedInAt?.toISOString() ?? null,
-      cancelledAt: booking.cancelledAt?.toISOString() ?? null,
-      createdAt: booking.createdAt.toISOString(),
-      updatedAt: booking.updatedAt.toISOString(),
-    };
-}
+import { toBookingItemResponse } from './booking.mapper';
   
 function buildCancelResponse(
     booking: NonNullable<Awaited<ReturnType<typeof bookingRepo.findById>>>,
@@ -171,6 +140,7 @@ export async function cancelBooking(
   try {
     await bookingQueue.cancelReminderJob(bookingId);
     await bookingQueue.cancelExpireJob(bookingId);
+    await bookingQueue.cancelCompleteJob(bookingId);
     await bookingQueue.enqueueCancellationEmail(
       bookingId,
       customerId,

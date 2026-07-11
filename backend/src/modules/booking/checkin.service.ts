@@ -10,40 +10,8 @@ import {
 import * as cafeRepo from '../cafe/cafe.repository';
 import * as bookingRepo from './booking.repository';
 import * as bookingQueue from './booking-queue.service';
-import type { CheckInResponse, BookingItemResponse, BookingSeatSummary } from './booking.dto';
-
-
-function toBookingItemResponse(booking: {
-  id: string;
-  confirmationNumber: string;
-  customerId: string;
-  cafeId: string;
-  seatId: string;
-  startTime: Date;
-  endTime: Date;
-  status: BookingStatus;
-  notes: string | null;
-  checkedInAt: Date | null;
-  cancelledAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-}): BookingItemResponse {
-  return {
-    id: booking.id,
-    confirmationNumber: booking.confirmationNumber,
-    customerId: booking.customerId,
-    cafeId: booking.cafeId,
-    seatId: booking.seatId,
-    startTime: booking.startTime.toISOString(),
-    endTime: booking.endTime.toISOString(),
-    status: booking.status,
-    notes: booking.notes,
-    checkedInAt: booking.checkedInAt?.toISOString() ?? null,
-    cancelledAt: booking.cancelledAt?.toISOString() ?? null,
-    createdAt: booking.createdAt.toISOString(),
-    updatedAt: booking.updatedAt.toISOString(),
-  };
-}
+import type { CheckInResponse } from './booking.dto';
+import { toBookingItemResponse } from './booking.mapper';
 
 function buildCheckInResponse(
   booking: NonNullable<Awaited<ReturnType<typeof bookingRepo.findById>>>,
@@ -85,27 +53,21 @@ function assertCheckInWindow(
 }
 
 
-export async function checkIn(
-  bookingId: string,
-  userId: string,
+type BookingWithRelations = NonNullable<
+  Awaited<ReturnType<typeof bookingRepo.findById>>
+>;
+
+async function performCheckIn(
+  booking: BookingWithRelations,
+  actorId: string,
+  reason: 'CUSTOMER_CHECK_IN' | 'OWNER_CHECK_IN',
 ): Promise<CheckInResponse> {
-  // ── 1) Load booking ──
-  const booking = await bookingRepo.findById(bookingId);
-  if (!booking) {
-    throw new NotFoundError('BOOKING_NOT_FOUND');
-  }
+  const bookingId = booking.id;
 
-  // ── 2) Ownership ──
-  if (booking.customerId !== userId) {
-    throw new ForbiddenError('FORBIDDEN', 'You can only check in your own bookings');
-  }
-
-  // ── 3) Idempotent: đã CHECKED_IN ──
   if (booking.status === BookingStatus.CHECKED_IN) {
     return buildCheckInResponse(booking);
   }
 
-  // ── 4) Chỉ check-in khi CONFIRMED ──
   if (booking.status !== BookingStatus.CONFIRMED) {
     throw new ConflictError(
       'BOOKING_INVALID_STATUS',
@@ -113,12 +75,10 @@ export async function checkIn(
     );
   }
 
-  // ── 5) Time window ──
   const cafe = await cafeRepo.findById(booking.cafeId);
   const graceMinutes = cafe?.checkinGraceMinutes ?? 15;
   assertCheckInWindow(booking.startTime, graceMinutes);
 
-  // ── 6) TX: conditional update ──
   const now = new Date();
   const updatedCount = await prisma.$transaction(
     async (tx: Prisma.TransactionClient) => {
@@ -140,20 +100,21 @@ export async function checkIn(
           bookingId,
           fromStatus: BookingStatus.CONFIRMED,
           toStatus: BookingStatus.CHECKED_IN,
-          changedById: userId,
-          reason: 'CUSTOMER_CHECK_IN',
+          changedById: actorId,
+          reason,
         },
         tx,
       );
 
       await bookingRepo.createAuditLog(
         {
-          actorId: userId,
+          actorId,
           action: 'BOOKING_CHECKED_IN',
           resourceType: 'BOOKING',
           resourceId: bookingId,
           changes: {
             checkedInAt: now.toISOString(),
+            reason,
           },
         },
         tx,
@@ -163,7 +124,6 @@ export async function checkIn(
     },
   );
 
-  // ── 7) Race handling: 0 rows ──
   if (updatedCount === 0) {
     const fresh = await bookingRepo.findById(bookingId);
     if (!fresh) throw new NotFoundError('BOOKING_NOT_FOUND');
@@ -178,13 +138,11 @@ export async function checkIn(
     );
   }
 
-  // ── 8) Load lại sau commit ──
   const checkedIn = await bookingRepo.findById(bookingId);
   if (!checkedIn) throw new NotFoundError('BOOKING_NOT_FOUND');
 
   const response = buildCheckInResponse(checkedIn);
 
-  // ── 9) Post-commit: chỉ cancel expire job ──
   try {
     await bookingQueue.cancelExpireJob(bookingId);
   } catch (e) {
@@ -192,4 +150,25 @@ export async function checkIn(
   }
 
   return response;
+}
+
+export async function checkIn(bookingId: string, userId: string) {
+  const booking = await bookingRepo.findById(bookingId);
+  if (!booking) throw new NotFoundError('BOOKING_NOT_FOUND');
+  if (booking.customerId !== userId) {
+    throw new ForbiddenError('FORBIDDEN', 'You can only check in your own bookings');
+  }
+  return performCheckIn(booking, userId, 'CUSTOMER_CHECK_IN');
+}
+export async function checkInForOwner(
+  cafeId: string,
+  bookingId: string,
+  ownerId: string,
+) {
+  const booking = await bookingRepo.findById(bookingId);
+  if (!booking) throw new NotFoundError('BOOKING_NOT_FOUND');
+  if (booking.cafeId !== cafeId) {
+    throw new NotFoundError('BOOKING_NOT_FOUND'); // không leak booking café khác
+  }
+  return performCheckIn(booking, ownerId, 'OWNER_CHECK_IN');
 }

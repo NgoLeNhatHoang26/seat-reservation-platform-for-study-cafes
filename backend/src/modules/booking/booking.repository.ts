@@ -10,7 +10,7 @@ type FindByCustomerParams = {
     status?: BookingStatus;
     upcoming?: boolean;
     cafeId?: string;
-    sort?: 'createdAt' | 'startTime';
+    sort?: '-startTime' | 'startTime';
 }
 
 export type UpdateBookingStatusData = {
@@ -18,6 +18,7 @@ export type UpdateBookingStatusData = {
     checkedInAt?: Date | null;
     cancelledAt?: Date | null;
     cancellationReason?: string | null;
+    expiredAt?: Date | null;
     updatedAt?: Date;
 }
 
@@ -77,7 +78,7 @@ export async function findByIdWithLock(bookingId: string, tx: Tx) {
     }>
     >(
         Prisma.sql`
-            SELECT
+          SELECT
             b.id,
             b.customer_id,
             b.cafe_id,
@@ -91,10 +92,10 @@ export async function findByIdWithLock(bookingId: string, tx: Tx) {
             b.notes,
             b.created_at,
             b.updated_at
-        FROM bookings b
-        WHERE b.id = ${bookingId}
-        FOR UPDATE
-        `
+          FROM bookings b
+          WHERE b.id = CAST(${bookingId} AS uuid)
+          FOR UPDATE
+          `
     );
     return row[0] ?? null;
 } 
@@ -117,7 +118,7 @@ export async function lockSeatForUpdate(seatId: string, tx: Tx) {
         s.is_active,
         s.deleted_at
       FROM seats s
-      WHERE s.id = ${seatId}
+      WHERE s.id = CAST(${seatId} AS uuid)
         AND s.deleted_at IS NULL
         AND s.is_active = true
       FOR UPDATE
@@ -203,6 +204,7 @@ export async function updateBookingStatus(
           checkedInAt: data.checkedInAt,
           cancelledAt: data.cancelledAt,
           cancellationReason: data.cancellationReason,
+          expiredAt: data.expiredAt,
           updatedAt: data.updatedAt ?? new Date(),
         },
       });

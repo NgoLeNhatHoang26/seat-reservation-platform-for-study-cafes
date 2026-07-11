@@ -1,5 +1,5 @@
-import { ValidationError, ConflictError, NotFoundError } from '../../common/errors';
-import { CafeStatus } from '../../generated/prisma/enums';
+import { ValidationError, ConflictError, NotFoundError, ForbiddenError } from '../../common/errors';
+import { CafeStatus, UserRole } from '../../generated/prisma/enums';
 import * as cafeRepo from '../cafe/cafe.repository';
 import * as bookingRepo from './booking.repository';
 import { prisma } from '../../config/prisma';
@@ -9,7 +9,9 @@ import { customAlphabet } from 'nanoid';
 import { AppError } from '../../common/errors';
 import * as cache from '../../common/cache';
 import * as bookingQueue from './booking-queue.service';
-import type { CreateBookingDto, BookingResponse } from './booking.dto';
+import type { CreateBookingDto, BookingResponse, ListBookingsParams } from './booking.dto';
+import { buildCursorPaginationResult } from '../../common/pagination';
+import { toBookingResponse, toBookingListItem } from './booking.mapper';
 
 type DaySchedule = { open: string; close: string };
 type OperatingHours = Record<string, DaySchedule>;
@@ -64,53 +66,6 @@ function generateConfirmationNumber(startTime: Date): string {
   return `BK-${ymd}-${genConfirmationSuffix()}`;
 }
 
-function toBookingResponse(
-  booking: {
-    id: string;
-    confirmationNumber: string;
-    customerId: string;
-    cafeId: string;
-    seatId: string;
-    startTime: Date;
-    endTime: Date;
-    status: BookingStatus;
-    notes: string | null;
-    checkedInAt: Date | null;
-    cancelledAt: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
-  },
-  seat: { id: string; seatNumber: string; zoneId: string },
-  cafe: { id: string; name: string; timezone: string },
-): BookingResponse {
-  return {
-    booking: {
-      id: booking.id,
-      confirmationNumber: booking.confirmationNumber,
-      customerId: booking.customerId,
-      cafeId: booking.cafeId,
-      seatId: booking.seatId,
-      startTime: booking.startTime.toISOString(),
-      endTime: booking.endTime.toISOString(),
-      status: booking.status,
-      notes: booking.notes,
-      checkedInAt: booking.checkedInAt?.toISOString() ?? null,
-      cancelledAt: booking.cancelledAt?.toISOString() ?? null,
-      createdAt: booking.createdAt.toISOString(),
-      updatedAt: booking.updatedAt.toISOString(),
-    },
-    seat: {
-      id: seat.id,
-      label: seat.seatNumber,
-      zoneId: seat.zoneId,
-    },
-    cafe: {
-      id: cafe.id,
-      name: cafe.name,
-      timezone: cafe.timezone,
-    },
-  };
-}
 
 export async function validateTimeSlot(
   cafeId: string,
@@ -347,9 +302,75 @@ export async function createBooking(
       start,
       cafe.checkinGraceMinutes,
     );
+    await bookingQueue.enqueueAutoCompleteJob(booking.id, end);
   } catch (e) {
     console.warn('Failed to enqueue booking jobs', e);
   }
 
   return response;
 }
+
+async function assertCanViewBooking(
+  booking: { customerId: string; cafeId: string },
+  requesterId: string,
+  requesterRole: UserRole,
+): Promise<void> {
+  if (requesterRole === UserRole.ADMIN) return;
+  if (requesterRole === UserRole.CUSTOMER) {
+    if (booking.customerId !== requesterId) {
+      throw new ForbiddenError('FORBIDDEN');
+    }
+    return;
+  }
+  if (requesterRole === UserRole.OWNER) {
+    const cafe = await cafeRepo.findById(booking.cafeId);
+    if (!cafe || cafe.ownerId !== requesterId) {
+      throw new ForbiddenError('FORBIDDEN');
+    }
+    return;
+  }
+  throw new ForbiddenError('FORBIDDEN');
+}
+
+export async function getBookingById(
+  bookingId: string,
+  requesterId: string,
+  requesterRole: UserRole,
+): Promise<BookingResponse> {
+  const booking = await bookingRepo.findById(bookingId);
+  if (!booking) {
+    throw new NotFoundError('BOOKING_NOT_FOUND');
+  }
+
+  await assertCanViewBooking(booking, requesterId, requesterRole);
+
+  return toBookingResponse(
+    booking as Parameters<typeof toBookingResponse>[0],
+    booking.seat,
+    booking.cafe,
+  );
+}
+
+
+export async function listBookingsByCustomer(
+  customerId: string,
+  params: ListBookingsParams,
+) {
+  const rows = await bookingRepo.findByCustomer(customerId, {
+    limit: params.limit,
+    cursor: params.cursor,
+    status: params.status,
+    upcoming: params.upcoming,
+    cafeId: params.cafeId,
+    sort: params.sort === 'startTime' ? 'startTime' : '-startTime',
+  });
+
+  const page = buildCursorPaginationResult(rows, params.limit);
+
+  return {
+    items: page.items.map((row) => toBookingListItem(row as Parameters<typeof toBookingListItem>[0])),
+    nextCursor: page.nextCursor,
+    hasMore: page.hasMore,
+  };
+}
+
