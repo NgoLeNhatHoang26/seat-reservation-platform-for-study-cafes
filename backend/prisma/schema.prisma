@@ -5,8 +5,9 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -27,6 +28,12 @@ enum UserStatus {
   PENDING_EMAIL_VERIFICATION
   ACTIVE
   SUSPENDED
+}
+
+enum OwnerVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 // ─── Café & layout ─────────────────────────────────────────────────
@@ -97,6 +104,7 @@ model User {
   deletedAt           DateTime?         @map("deleted_at")
 
   customerProfile     CustomerProfile?
+  ownerProfile        OwnerProfile?
   ownedCafes          Cafe[]            @relation("CafeOwner")
   bookings            Booking[]         @relation("CustomerBookings")
   notificationLogs    NotificationLog[]
@@ -120,6 +128,22 @@ model CustomerProfile {
   @@map("customer_profiles")
 }
 
+model OwnerProfile {
+  id                 String                  @id @default(uuid()) @db.Uuid
+  userId             String                  @unique @map("user_id") @db.Uuid
+  businessLicenseUrl String                  @map("business_license_url")
+  idCardUrl          String                  @map("id_card_url")
+  verificationStatus OwnerVerificationStatus @default(PENDING) @map("verification_status")
+  rejectionReason    String?                 @map("rejection_reason")
+  reviewedAt         DateTime?               @map("reviewed_at")
+  createdAt          DateTime                @default(now()) @map("created_at")
+  updatedAt          DateTime                @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("owner_profiles")
+}
+
 model Cafe {
   id                          String     @id @default(uuid()) @db.Uuid
   ownerId                     String     @map("owner_id") @db.Uuid
@@ -132,6 +156,8 @@ model Cafe {
   email                       String?
   status                      CafeStatus @default(PENDING_VERIFICATION)
   rejectionReason             String?    @map("rejection_reason")
+  coverImageUrl               String?    @map("cover_image_url")
+  galleryImages               Json       @default("[]") @map("gallery_images")
   operatingHours              Json       @map("operating_hours")
   amenities                   Json       @default("[]")
   slotDurationMinutes         Int        @default(120) @map("slot_duration_minutes")
@@ -242,6 +268,7 @@ model NotificationLog {
   bookingId    String?            @map("booking_id") @db.Uuid
   channel      NotificationChannel
   type         NotificationType
+  isRead       Boolean  @default(false) @map("is_read")
   status       NotificationStatus @default(PENDING)
   recipient    String
   errorMessage String?            @map("error_message")

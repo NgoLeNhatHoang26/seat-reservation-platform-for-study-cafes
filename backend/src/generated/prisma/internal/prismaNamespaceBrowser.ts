@@ -51,6 +51,7 @@ export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 export const ModelName = {
   User: 'User',
   CustomerProfile: 'CustomerProfile',
+  OwnerProfile: 'OwnerProfile',
   Cafe: 'Cafe',
   Zone: 'Zone',
   Seat: 'Seat',
@@ -110,6 +111,21 @@ export const CustomerProfileScalarFieldEnum = {
 export type CustomerProfileScalarFieldEnum = (typeof CustomerProfileScalarFieldEnum)[keyof typeof CustomerProfileScalarFieldEnum]
 
 
+export const OwnerProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  businessLicenseUrl: 'businessLicenseUrl',
+  idCardUrl: 'idCardUrl',
+  verificationStatus: 'verificationStatus',
+  rejectionReason: 'rejectionReason',
+  reviewedAt: 'reviewedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OwnerProfileScalarFieldEnum = (typeof OwnerProfileScalarFieldEnum)[keyof typeof OwnerProfileScalarFieldEnum]
+
+
 export const CafeScalarFieldEnum = {
   id: 'id',
   ownerId: 'ownerId',
@@ -122,6 +138,8 @@ export const CafeScalarFieldEnum = {
   email: 'email',
   status: 'status',
   rejectionReason: 'rejectionReason',
+  coverImageUrl: 'coverImageUrl',
+  galleryImages: 'galleryImages',
   operatingHours: 'operatingHours',
   amenities: 'amenities',
   slotDurationMinutes: 'slotDurationMinutes',
@@ -210,6 +228,7 @@ export const NotificationLogScalarFieldEnum = {
   bookingId: 'bookingId',
   channel: 'channel',
   type: 'type',
+  isRead: 'isRead',
   status: 'status',
   recipient: 'recipient',
   errorMessage: 'errorMessage',

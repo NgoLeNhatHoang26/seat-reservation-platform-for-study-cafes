@@ -1,7 +1,14 @@
 /// <reference types="node" />
 
 import bcrypt from "bcryptjs";
-import { PrismaClient, UserRole, UserStatus, CafeStatus, SeatType } from "../src/generated/prisma/client";
+import {
+  PrismaClient,
+  UserRole,
+  UserStatus,
+  CafeStatus,
+  SeatType,
+  OwnerVerificationStatus,
+} from "../src/generated/prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -47,6 +54,25 @@ async function seedOwnerAndCafe() {
       status: UserStatus.ACTIVE,
       passwordHash,
       emailVerifiedAt: new Date(),
+    },
+  });
+
+  // Required for owner login (assertOwnerCanAuthenticate checks OwnerProfile)
+  await prisma.ownerProfile.upsert({
+    where: { userId: owner.id },
+    update: {
+      businessLicenseUrl: "https://example.com/seed/business-license.pdf",
+      idCardUrl: "https://example.com/seed/id-card.pdf",
+      verificationStatus: OwnerVerificationStatus.APPROVED,
+      rejectionReason: null,
+      reviewedAt: new Date(),
+    },
+    create: {
+      userId: owner.id,
+      businessLicenseUrl: "https://example.com/seed/business-license.pdf",
+      idCardUrl: "https://example.com/seed/id-card.pdf",
+      verificationStatus: OwnerVerificationStatus.APPROVED,
+      reviewedAt: new Date(),
     },
   });
 
@@ -129,6 +155,48 @@ async function seedOwnerAndCafe() {
   return { owner, cafe };
 }
 
+async function seedLoadTestCustomers(count = 30) {
+  const passwordHash = await bcrypt.hash("Customer123!", 12);
+
+  for (let i = 1; i <= count; i += 1) {
+    const email = `load-customer-${String(i).padStart(2, "0")}@example.com`;
+
+    const customer = await prisma.user.upsert({
+      where: { email },
+      update: {
+        fullName: `Load Customer ${i}`,
+        role: UserRole.CUSTOMER,
+        status: UserStatus.ACTIVE,
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      },
+      create: {
+        email,
+        fullName: `Load Customer ${i}`,
+        role: UserRole.CUSTOMER,
+        status: UserStatus.ACTIVE,
+        passwordHash,
+        emailVerifiedAt: new Date(),
+      },
+    });
+
+    await prisma.customerProfile.upsert({
+      where: { userId: customer.id },
+      update: {
+        preferredCity: "Hanoi",
+        emailNotifications: true,
+        smsNotifications: false,
+      },
+      create: {
+        userId: customer.id,
+        preferredCity: "Hanoi",
+        emailNotifications: true,
+        smsNotifications: false,
+      },
+    });
+  }
+}
+
 async function seedCustomer() {
   const passwordHash = await bcrypt.hash("Customer123!", 12);
 
@@ -174,6 +242,7 @@ async function main() {
   await seedAdmin();
   await seedOwnerAndCafe();
   await seedCustomer();
+  await seedLoadTestCustomers(30);
   console.log("Seed completed.");
 }
 

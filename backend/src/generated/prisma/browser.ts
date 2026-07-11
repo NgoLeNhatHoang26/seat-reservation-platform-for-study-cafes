@@ -28,6 +28,11 @@ export type User = Prisma.UserModel
  */
 export type CustomerProfile = Prisma.CustomerProfileModel
 /**
+ * Model OwnerProfile
+ * 
+ */
+export type OwnerProfile = Prisma.OwnerProfileModel
+/**
  * Model Cafe
  * 
  */

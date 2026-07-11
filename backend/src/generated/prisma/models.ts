@@ -10,6 +10,7 @@
  */
 export type * from './models/User'
 export type * from './models/CustomerProfile'
+export type * from './models/OwnerProfile'
 export type * from './models/Cafe'
 export type * from './models/Zone'
 export type * from './models/Seat'

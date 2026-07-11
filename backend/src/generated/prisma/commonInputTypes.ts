@@ -236,6 +236,23 @@ export type BoolWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedBoolFilter<$PrismaModel>
 }
 
+export type EnumOwnerVerificationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.OwnerVerificationStatus | Prisma.EnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OwnerVerificationStatus[] | Prisma.ListEnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OwnerVerificationStatus[] | Prisma.ListEnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOwnerVerificationStatusFilter<$PrismaModel> | $Enums.OwnerVerificationStatus
+}
+
+export type EnumOwnerVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OwnerVerificationStatus | Prisma.EnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OwnerVerificationStatus[] | Prisma.ListEnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OwnerVerificationStatus[] | Prisma.ListEnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOwnerVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.OwnerVerificationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOwnerVerificationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOwnerVerificationStatusFilter<$PrismaModel>
+}
+
 export type EnumCafeStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.CafeStatus | Prisma.EnumCafeStatusFieldRefInput<$PrismaModel>
   in?: $Enums.CafeStatus[] | Prisma.ListEnumCafeStatusFieldRefInput<$PrismaModel>
@@ -715,6 +732,23 @@ export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedBoolFilter<$PrismaModel>
   _max?: Prisma.NestedBoolFilter<$PrismaModel>
+}
+
+export type NestedEnumOwnerVerificationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.OwnerVerificationStatus | Prisma.EnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OwnerVerificationStatus[] | Prisma.ListEnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OwnerVerificationStatus[] | Prisma.ListEnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOwnerVerificationStatusFilter<$PrismaModel> | $Enums.OwnerVerificationStatus
+}
+
+export type NestedEnumOwnerVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.OwnerVerificationStatus | Prisma.EnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.OwnerVerificationStatus[] | Prisma.ListEnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.OwnerVerificationStatus[] | Prisma.ListEnumOwnerVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumOwnerVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.OwnerVerificationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumOwnerVerificationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumOwnerVerificationStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumCafeStatusFilter<$PrismaModel = never> = {

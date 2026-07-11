@@ -297,6 +297,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   customerProfile?: Prisma.XOR<Prisma.CustomerProfileNullableScalarRelationFilter, Prisma.CustomerProfileWhereInput> | null
+  ownerProfile?: Prisma.XOR<Prisma.OwnerProfileNullableScalarRelationFilter, Prisma.OwnerProfileWhereInput> | null
   ownedCafes?: Prisma.CafeListRelationFilter
   bookings?: Prisma.BookingListRelationFilter
   notificationLogs?: Prisma.NotificationLogListRelationFilter
@@ -321,6 +322,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   customerProfile?: Prisma.CustomerProfileOrderByWithRelationInput
+  ownerProfile?: Prisma.OwnerProfileOrderByWithRelationInput
   ownedCafes?: Prisma.CafeOrderByRelationAggregateInput
   bookings?: Prisma.BookingOrderByRelationAggregateInput
   notificationLogs?: Prisma.NotificationLogOrderByRelationAggregateInput
@@ -348,6 +350,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   customerProfile?: Prisma.XOR<Prisma.CustomerProfileNullableScalarRelationFilter, Prisma.CustomerProfileWhereInput> | null
+  ownerProfile?: Prisma.XOR<Prisma.OwnerProfileNullableScalarRelationFilter, Prisma.OwnerProfileWhereInput> | null
   ownedCafes?: Prisma.CafeListRelationFilter
   bookings?: Prisma.BookingListRelationFilter
   notificationLogs?: Prisma.NotificationLogListRelationFilter
@@ -416,6 +419,7 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeCreateNestedManyWithoutOwnerInput
   bookings?: Prisma.BookingCreateNestedManyWithoutCustomerInput
   notificationLogs?: Prisma.NotificationLogCreateNestedManyWithoutUserInput
@@ -440,6 +444,7 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeUncheckedCreateNestedManyWithoutOwnerInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutCustomerInput
   notificationLogs?: Prisma.NotificationLogUncheckedCreateNestedManyWithoutUserInput
@@ -464,6 +469,7 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUpdateManyWithoutOwnerNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutCustomerNestedInput
   notificationLogs?: Prisma.NotificationLogUpdateManyWithoutUserNestedInput
@@ -488,6 +494,7 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUncheckedUpdateManyWithoutOwnerNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutCustomerNestedInput
   notificationLogs?: Prisma.NotificationLogUncheckedUpdateManyWithoutUserNestedInput
@@ -667,6 +674,20 @@ export type UserUpdateOneRequiredWithoutCustomerProfileNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCustomerProfileInput, Prisma.UserUpdateWithoutCustomerProfileInput>, Prisma.UserUncheckedUpdateWithoutCustomerProfileInput>
 }
 
+export type UserCreateNestedOneWithoutOwnerProfileInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOwnerProfileInput, Prisma.UserUncheckedCreateWithoutOwnerProfileInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOwnerProfileInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutOwnerProfileNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOwnerProfileInput, Prisma.UserUncheckedCreateWithoutOwnerProfileInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOwnerProfileInput
+  upsert?: Prisma.UserUpsertWithoutOwnerProfileInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOwnerProfileInput, Prisma.UserUpdateWithoutOwnerProfileInput>, Prisma.UserUncheckedUpdateWithoutOwnerProfileInput>
+}
+
 export type UserCreateNestedOneWithoutOwnedCafesInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutOwnedCafesInput, Prisma.UserUncheckedCreateWithoutOwnedCafesInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutOwnedCafesInput
@@ -757,6 +778,7 @@ export type UserCreateWithoutCustomerProfileInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  ownerProfile?: Prisma.OwnerProfileCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeCreateNestedManyWithoutOwnerInput
   bookings?: Prisma.BookingCreateNestedManyWithoutCustomerInput
   notificationLogs?: Prisma.NotificationLogCreateNestedManyWithoutUserInput
@@ -780,6 +802,7 @@ export type UserUncheckedCreateWithoutCustomerProfileInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  ownerProfile?: Prisma.OwnerProfileUncheckedCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeUncheckedCreateNestedManyWithoutOwnerInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutCustomerInput
   notificationLogs?: Prisma.NotificationLogUncheckedCreateNestedManyWithoutUserInput
@@ -819,6 +842,7 @@ export type UserUpdateWithoutCustomerProfileInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ownerProfile?: Prisma.OwnerProfileUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUpdateManyWithoutOwnerNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutCustomerNestedInput
   notificationLogs?: Prisma.NotificationLogUpdateManyWithoutUserNestedInput
@@ -842,6 +866,119 @@ export type UserUncheckedUpdateWithoutCustomerProfileInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ownerProfile?: Prisma.OwnerProfileUncheckedUpdateOneWithoutUserNestedInput
+  ownedCafes?: Prisma.CafeUncheckedUpdateManyWithoutOwnerNestedInput
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutCustomerNestedInput
+  notificationLogs?: Prisma.NotificationLogUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bookingHistoryEdits?: Prisma.BookingHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+}
+
+export type UserCreateWithoutOwnerProfileInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  role: $Enums.UserRole
+  status?: $Enums.UserStatus
+  fullName: string
+  phone?: string | null
+  emailVerifiedAt?: Date | string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  suspendedAt?: Date | string | null
+  suspensionReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  customerProfile?: Prisma.CustomerProfileCreateNestedOneWithoutUserInput
+  ownedCafes?: Prisma.CafeCreateNestedManyWithoutOwnerInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutCustomerInput
+  notificationLogs?: Prisma.NotificationLogCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  bookingHistoryEdits?: Prisma.BookingHistoryCreateNestedManyWithoutChangedByInput
+}
+
+export type UserUncheckedCreateWithoutOwnerProfileInput = {
+  id?: string
+  email: string
+  passwordHash: string
+  role: $Enums.UserRole
+  status?: $Enums.UserStatus
+  fullName: string
+  phone?: string | null
+  emailVerifiedAt?: Date | string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
+  suspendedAt?: Date | string | null
+  suspensionReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  customerProfile?: Prisma.CustomerProfileUncheckedCreateNestedOneWithoutUserInput
+  ownedCafes?: Prisma.CafeUncheckedCreateNestedManyWithoutOwnerInput
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutCustomerInput
+  notificationLogs?: Prisma.NotificationLogUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  bookingHistoryEdits?: Prisma.BookingHistoryUncheckedCreateNestedManyWithoutChangedByInput
+}
+
+export type UserCreateOrConnectWithoutOwnerProfileInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOwnerProfileInput, Prisma.UserUncheckedCreateWithoutOwnerProfileInput>
+}
+
+export type UserUpsertWithoutOwnerProfileInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOwnerProfileInput, Prisma.UserUncheckedUpdateWithoutOwnerProfileInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOwnerProfileInput, Prisma.UserUncheckedCreateWithoutOwnerProfileInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOwnerProfileInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOwnerProfileInput, Prisma.UserUncheckedUpdateWithoutOwnerProfileInput>
+}
+
+export type UserUpdateWithoutOwnerProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerProfile?: Prisma.CustomerProfileUpdateOneWithoutUserNestedInput
+  ownedCafes?: Prisma.CafeUpdateManyWithoutOwnerNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutCustomerNestedInput
+  notificationLogs?: Prisma.NotificationLogUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  bookingHistoryEdits?: Prisma.BookingHistoryUpdateManyWithoutChangedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOwnerProfileInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  customerProfile?: Prisma.CustomerProfileUncheckedUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUncheckedUpdateManyWithoutOwnerNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutCustomerNestedInput
   notificationLogs?: Prisma.NotificationLogUncheckedUpdateManyWithoutUserNestedInput
@@ -866,6 +1003,7 @@ export type UserCreateWithoutOwnedCafesInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileCreateNestedOneWithoutUserInput
   bookings?: Prisma.BookingCreateNestedManyWithoutCustomerInput
   notificationLogs?: Prisma.NotificationLogCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
@@ -889,6 +1027,7 @@ export type UserUncheckedCreateWithoutOwnedCafesInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedCreateNestedOneWithoutUserInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutCustomerInput
   notificationLogs?: Prisma.NotificationLogUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
@@ -928,6 +1067,7 @@ export type UserUpdateWithoutOwnedCafesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUpdateOneWithoutUserNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutCustomerNestedInput
   notificationLogs?: Prisma.NotificationLogUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
@@ -951,6 +1091,7 @@ export type UserUncheckedUpdateWithoutOwnedCafesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedUpdateOneWithoutUserNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutCustomerNestedInput
   notificationLogs?: Prisma.NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
@@ -974,6 +1115,7 @@ export type UserCreateWithoutBookingsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeCreateNestedManyWithoutOwnerInput
   notificationLogs?: Prisma.NotificationLogCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
@@ -997,6 +1139,7 @@ export type UserUncheckedCreateWithoutBookingsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeUncheckedCreateNestedManyWithoutOwnerInput
   notificationLogs?: Prisma.NotificationLogUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
@@ -1036,6 +1179,7 @@ export type UserUpdateWithoutBookingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUpdateManyWithoutOwnerNestedInput
   notificationLogs?: Prisma.NotificationLogUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
@@ -1059,6 +1203,7 @@ export type UserUncheckedUpdateWithoutBookingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUncheckedUpdateManyWithoutOwnerNestedInput
   notificationLogs?: Prisma.NotificationLogUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
@@ -1082,6 +1227,7 @@ export type UserCreateWithoutBookingHistoryEditsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeCreateNestedManyWithoutOwnerInput
   bookings?: Prisma.BookingCreateNestedManyWithoutCustomerInput
   notificationLogs?: Prisma.NotificationLogCreateNestedManyWithoutUserInput
@@ -1105,6 +1251,7 @@ export type UserUncheckedCreateWithoutBookingHistoryEditsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeUncheckedCreateNestedManyWithoutOwnerInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutCustomerInput
   notificationLogs?: Prisma.NotificationLogUncheckedCreateNestedManyWithoutUserInput
@@ -1144,6 +1291,7 @@ export type UserUpdateWithoutBookingHistoryEditsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUpdateManyWithoutOwnerNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutCustomerNestedInput
   notificationLogs?: Prisma.NotificationLogUpdateManyWithoutUserNestedInput
@@ -1167,6 +1315,7 @@ export type UserUncheckedUpdateWithoutBookingHistoryEditsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUncheckedUpdateManyWithoutOwnerNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutCustomerNestedInput
   notificationLogs?: Prisma.NotificationLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1190,6 +1339,7 @@ export type UserCreateWithoutNotificationLogsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeCreateNestedManyWithoutOwnerInput
   bookings?: Prisma.BookingCreateNestedManyWithoutCustomerInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
@@ -1213,6 +1363,7 @@ export type UserUncheckedCreateWithoutNotificationLogsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeUncheckedCreateNestedManyWithoutOwnerInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutCustomerInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
@@ -1252,6 +1403,7 @@ export type UserUpdateWithoutNotificationLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUpdateManyWithoutOwnerNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutCustomerNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
@@ -1275,6 +1427,7 @@ export type UserUncheckedUpdateWithoutNotificationLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUncheckedUpdateManyWithoutOwnerNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutCustomerNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
@@ -1298,6 +1451,7 @@ export type UserCreateWithoutAuditLogsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeCreateNestedManyWithoutOwnerInput
   bookings?: Prisma.BookingCreateNestedManyWithoutCustomerInput
   notificationLogs?: Prisma.NotificationLogCreateNestedManyWithoutUserInput
@@ -1321,6 +1475,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedCreateNestedOneWithoutUserInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedCreateNestedOneWithoutUserInput
   ownedCafes?: Prisma.CafeUncheckedCreateNestedManyWithoutOwnerInput
   bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutCustomerInput
   notificationLogs?: Prisma.NotificationLogUncheckedCreateNestedManyWithoutUserInput
@@ -1360,6 +1515,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUpdateManyWithoutOwnerNestedInput
   bookings?: Prisma.BookingUpdateManyWithoutCustomerNestedInput
   notificationLogs?: Prisma.NotificationLogUpdateManyWithoutUserNestedInput
@@ -1383,6 +1539,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   customerProfile?: Prisma.CustomerProfileUncheckedUpdateOneWithoutUserNestedInput
+  ownerProfile?: Prisma.OwnerProfileUncheckedUpdateOneWithoutUserNestedInput
   ownedCafes?: Prisma.CafeUncheckedUpdateManyWithoutOwnerNestedInput
   bookings?: Prisma.BookingUncheckedUpdateManyWithoutCustomerNestedInput
   notificationLogs?: Prisma.NotificationLogUncheckedUpdateManyWithoutUserNestedInput
@@ -1473,6 +1630,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   deletedAt?: boolean
   customerProfile?: boolean | Prisma.User$customerProfileArgs<ExtArgs>
+  ownerProfile?: boolean | Prisma.User$ownerProfileArgs<ExtArgs>
   ownedCafes?: boolean | Prisma.User$ownedCafesArgs<ExtArgs>
   bookings?: boolean | Prisma.User$bookingsArgs<ExtArgs>
   notificationLogs?: boolean | Prisma.User$notificationLogsArgs<ExtArgs>
@@ -1538,6 +1696,7 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "role" | "status" | "fullName" | "phone" | "emailVerifiedAt" | "failedLoginAttempts" | "lockedUntil" | "suspendedAt" | "suspensionReason" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   customerProfile?: boolean | Prisma.User$customerProfileArgs<ExtArgs>
+  ownerProfile?: boolean | Prisma.User$ownerProfileArgs<ExtArgs>
   ownedCafes?: boolean | Prisma.User$ownedCafesArgs<ExtArgs>
   bookings?: boolean | Prisma.User$bookingsArgs<ExtArgs>
   notificationLogs?: boolean | Prisma.User$notificationLogsArgs<ExtArgs>
@@ -1552,6 +1711,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     customerProfile: Prisma.$CustomerProfilePayload<ExtArgs> | null
+    ownerProfile: Prisma.$OwnerProfilePayload<ExtArgs> | null
     ownedCafes: Prisma.$CafePayload<ExtArgs>[]
     bookings: Prisma.$BookingPayload<ExtArgs>[]
     notificationLogs: Prisma.$NotificationLogPayload<ExtArgs>[]
@@ -1969,6 +2129,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   customerProfile<T extends Prisma.User$customerProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$customerProfileArgs<ExtArgs>>): Prisma.Prisma__CustomerProfileClient<runtime.Types.Result.GetResult<Prisma.$CustomerProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  ownerProfile<T extends Prisma.User$ownerProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownerProfileArgs<ExtArgs>>): Prisma.Prisma__OwnerProfileClient<runtime.Types.Result.GetResult<Prisma.$OwnerProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   ownedCafes<T extends Prisma.User$ownedCafesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedCafesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CafePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bookings<T extends Prisma.User$bookingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notificationLogs<T extends Prisma.User$notificationLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2422,6 +2583,25 @@ export type User$customerProfileArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   include?: Prisma.CustomerProfileInclude<ExtArgs> | null
   where?: Prisma.CustomerProfileWhereInput
+}
+
+/**
+ * User.ownerProfile
+ */
+export type User$ownerProfileArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OwnerProfile
+   */
+  select?: Prisma.OwnerProfileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OwnerProfile
+   */
+  omit?: Prisma.OwnerProfileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OwnerProfileInclude<ExtArgs> | null
+  where?: Prisma.OwnerProfileWhereInput
 }
 
 /**

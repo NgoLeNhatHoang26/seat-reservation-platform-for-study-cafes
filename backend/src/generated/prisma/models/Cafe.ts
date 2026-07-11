@@ -56,6 +56,7 @@ export type CafeMinAggregateOutputType = {
   email: string | null
   status: $Enums.CafeStatus | null
   rejectionReason: string | null
+  coverImageUrl: string | null
   slotDurationMinutes: number | null
   minAdvanceBookingMinutes: number | null
   maxAdvanceBookingDays: number | null
@@ -80,6 +81,7 @@ export type CafeMaxAggregateOutputType = {
   email: string | null
   status: $Enums.CafeStatus | null
   rejectionReason: string | null
+  coverImageUrl: string | null
   slotDurationMinutes: number | null
   minAdvanceBookingMinutes: number | null
   maxAdvanceBookingDays: number | null
@@ -104,6 +106,8 @@ export type CafeCountAggregateOutputType = {
   email: number
   status: number
   rejectionReason: number
+  coverImageUrl: number
+  galleryImages: number
   operatingHours: number
   amenities: number
   slotDurationMinutes: number
@@ -150,6 +154,7 @@ export type CafeMinAggregateInputType = {
   email?: true
   status?: true
   rejectionReason?: true
+  coverImageUrl?: true
   slotDurationMinutes?: true
   minAdvanceBookingMinutes?: true
   maxAdvanceBookingDays?: true
@@ -174,6 +179,7 @@ export type CafeMaxAggregateInputType = {
   email?: true
   status?: true
   rejectionReason?: true
+  coverImageUrl?: true
   slotDurationMinutes?: true
   minAdvanceBookingMinutes?: true
   maxAdvanceBookingDays?: true
@@ -198,6 +204,8 @@ export type CafeCountAggregateInputType = {
   email?: true
   status?: true
   rejectionReason?: true
+  coverImageUrl?: true
+  galleryImages?: true
   operatingHours?: true
   amenities?: true
   slotDurationMinutes?: true
@@ -311,6 +319,8 @@ export type CafeGroupByOutputType = {
   email: string | null
   status: $Enums.CafeStatus
   rejectionReason: string | null
+  coverImageUrl: string | null
+  galleryImages: runtime.JsonValue
   operatingHours: runtime.JsonValue
   amenities: runtime.JsonValue
   slotDurationMinutes: number
@@ -360,6 +370,8 @@ export type CafeWhereInput = {
   email?: Prisma.StringNullableFilter<"Cafe"> | string | null
   status?: Prisma.EnumCafeStatusFilter<"Cafe"> | $Enums.CafeStatus
   rejectionReason?: Prisma.StringNullableFilter<"Cafe"> | string | null
+  coverImageUrl?: Prisma.StringNullableFilter<"Cafe"> | string | null
+  galleryImages?: Prisma.JsonFilter<"Cafe">
   operatingHours?: Prisma.JsonFilter<"Cafe">
   amenities?: Prisma.JsonFilter<"Cafe">
   slotDurationMinutes?: Prisma.IntFilter<"Cafe"> | number
@@ -389,6 +401,8 @@ export type CafeOrderByWithRelationInput = {
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  coverImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  galleryImages?: Prisma.SortOrder
   operatingHours?: Prisma.SortOrder
   amenities?: Prisma.SortOrder
   slotDurationMinutes?: Prisma.SortOrder
@@ -421,6 +435,8 @@ export type CafeWhereUniqueInput = Prisma.AtLeast<{
   email?: Prisma.StringNullableFilter<"Cafe"> | string | null
   status?: Prisma.EnumCafeStatusFilter<"Cafe"> | $Enums.CafeStatus
   rejectionReason?: Prisma.StringNullableFilter<"Cafe"> | string | null
+  coverImageUrl?: Prisma.StringNullableFilter<"Cafe"> | string | null
+  galleryImages?: Prisma.JsonFilter<"Cafe">
   operatingHours?: Prisma.JsonFilter<"Cafe">
   amenities?: Prisma.JsonFilter<"Cafe">
   slotDurationMinutes?: Prisma.IntFilter<"Cafe"> | number
@@ -450,6 +466,8 @@ export type CafeOrderByWithAggregationInput = {
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  coverImageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  galleryImages?: Prisma.SortOrder
   operatingHours?: Prisma.SortOrder
   amenities?: Prisma.SortOrder
   slotDurationMinutes?: Prisma.SortOrder
@@ -484,6 +502,8 @@ export type CafeScalarWhereWithAggregatesInput = {
   email?: Prisma.StringNullableWithAggregatesFilter<"Cafe"> | string | null
   status?: Prisma.EnumCafeStatusWithAggregatesFilter<"Cafe"> | $Enums.CafeStatus
   rejectionReason?: Prisma.StringNullableWithAggregatesFilter<"Cafe"> | string | null
+  coverImageUrl?: Prisma.StringNullableWithAggregatesFilter<"Cafe"> | string | null
+  galleryImages?: Prisma.JsonWithAggregatesFilter<"Cafe">
   operatingHours?: Prisma.JsonWithAggregatesFilter<"Cafe">
   amenities?: Prisma.JsonWithAggregatesFilter<"Cafe">
   slotDurationMinutes?: Prisma.IntWithAggregatesFilter<"Cafe"> | number
@@ -509,6 +529,8 @@ export type CafeCreateInput = {
   email?: string | null
   status?: $Enums.CafeStatus
   rejectionReason?: string | null
+  coverImageUrl?: string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: number
@@ -538,6 +560,8 @@ export type CafeUncheckedCreateInput = {
   email?: string | null
   status?: $Enums.CafeStatus
   rejectionReason?: string | null
+  coverImageUrl?: string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: number
@@ -565,6 +589,8 @@ export type CafeUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -594,6 +620,8 @@ export type CafeUncheckedUpdateInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -622,6 +650,8 @@ export type CafeCreateManyInput = {
   email?: string | null
   status?: $Enums.CafeStatus
   rejectionReason?: string | null
+  coverImageUrl?: string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: number
@@ -647,6 +677,8 @@ export type CafeUpdateManyMutationInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -673,6 +705,8 @@ export type CafeUncheckedUpdateManyInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -709,6 +743,8 @@ export type CafeCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   status?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
+  coverImageUrl?: Prisma.SortOrder
+  galleryImages?: Prisma.SortOrder
   operatingHours?: Prisma.SortOrder
   amenities?: Prisma.SortOrder
   slotDurationMinutes?: Prisma.SortOrder
@@ -744,6 +780,7 @@ export type CafeMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   status?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
+  coverImageUrl?: Prisma.SortOrder
   slotDurationMinutes?: Prisma.SortOrder
   minAdvanceBookingMinutes?: Prisma.SortOrder
   maxAdvanceBookingDays?: Prisma.SortOrder
@@ -768,6 +805,7 @@ export type CafeMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   status?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
+  coverImageUrl?: Prisma.SortOrder
   slotDurationMinutes?: Prisma.SortOrder
   minAdvanceBookingMinutes?: Prisma.SortOrder
   maxAdvanceBookingDays?: Prisma.SortOrder
@@ -879,6 +917,8 @@ export type CafeCreateWithoutOwnerInput = {
   email?: string | null
   status?: $Enums.CafeStatus
   rejectionReason?: string | null
+  coverImageUrl?: string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: number
@@ -906,6 +946,8 @@ export type CafeUncheckedCreateWithoutOwnerInput = {
   email?: string | null
   status?: $Enums.CafeStatus
   rejectionReason?: string | null
+  coverImageUrl?: string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: number
@@ -963,6 +1005,8 @@ export type CafeScalarWhereInput = {
   email?: Prisma.StringNullableFilter<"Cafe"> | string | null
   status?: Prisma.EnumCafeStatusFilter<"Cafe"> | $Enums.CafeStatus
   rejectionReason?: Prisma.StringNullableFilter<"Cafe"> | string | null
+  coverImageUrl?: Prisma.StringNullableFilter<"Cafe"> | string | null
+  galleryImages?: Prisma.JsonFilter<"Cafe">
   operatingHours?: Prisma.JsonFilter<"Cafe">
   amenities?: Prisma.JsonFilter<"Cafe">
   slotDurationMinutes?: Prisma.IntFilter<"Cafe"> | number
@@ -988,6 +1032,8 @@ export type CafeCreateWithoutZonesInput = {
   email?: string | null
   status?: $Enums.CafeStatus
   rejectionReason?: string | null
+  coverImageUrl?: string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: number
@@ -1016,6 +1062,8 @@ export type CafeUncheckedCreateWithoutZonesInput = {
   email?: string | null
   status?: $Enums.CafeStatus
   rejectionReason?: string | null
+  coverImageUrl?: string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: number
@@ -1058,6 +1106,8 @@ export type CafeUpdateWithoutZonesInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1086,6 +1136,8 @@ export type CafeUncheckedUpdateWithoutZonesInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1112,6 +1164,8 @@ export type CafeCreateWithoutBookingsInput = {
   email?: string | null
   status?: $Enums.CafeStatus
   rejectionReason?: string | null
+  coverImageUrl?: string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: number
@@ -1140,6 +1194,8 @@ export type CafeUncheckedCreateWithoutBookingsInput = {
   email?: string | null
   status?: $Enums.CafeStatus
   rejectionReason?: string | null
+  coverImageUrl?: string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: number
@@ -1182,6 +1238,8 @@ export type CafeUpdateWithoutBookingsInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1210,6 +1268,8 @@ export type CafeUncheckedUpdateWithoutBookingsInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1236,6 +1296,8 @@ export type CafeCreateManyOwnerInput = {
   email?: string | null
   status?: $Enums.CafeStatus
   rejectionReason?: string | null
+  coverImageUrl?: string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: number
@@ -1261,6 +1323,8 @@ export type CafeUpdateWithoutOwnerInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1288,6 +1352,8 @@ export type CafeUncheckedUpdateWithoutOwnerInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1315,6 +1381,8 @@ export type CafeUncheckedUpdateManyWithoutOwnerInput = {
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumCafeStatusFieldUpdateOperationsInput | $Enums.CafeStatus
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  galleryImages?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   operatingHours?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   amenities?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   slotDurationMinutes?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1381,6 +1449,8 @@ export type CafeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   status?: boolean
   rejectionReason?: boolean
+  coverImageUrl?: boolean
+  galleryImages?: boolean
   operatingHours?: boolean
   amenities?: boolean
   slotDurationMinutes?: boolean
@@ -1411,6 +1481,8 @@ export type CafeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   status?: boolean
   rejectionReason?: boolean
+  coverImageUrl?: boolean
+  galleryImages?: boolean
   operatingHours?: boolean
   amenities?: boolean
   slotDurationMinutes?: boolean
@@ -1438,6 +1510,8 @@ export type CafeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   status?: boolean
   rejectionReason?: boolean
+  coverImageUrl?: boolean
+  galleryImages?: boolean
   operatingHours?: boolean
   amenities?: boolean
   slotDurationMinutes?: boolean
@@ -1465,6 +1539,8 @@ export type CafeSelectScalar = {
   email?: boolean
   status?: boolean
   rejectionReason?: boolean
+  coverImageUrl?: boolean
+  galleryImages?: boolean
   operatingHours?: boolean
   amenities?: boolean
   slotDurationMinutes?: boolean
@@ -1479,7 +1555,7 @@ export type CafeSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CafeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "name" | "slug" | "description" | "address" | "city" | "phone" | "email" | "status" | "rejectionReason" | "operatingHours" | "amenities" | "slotDurationMinutes" | "minAdvanceBookingMinutes" | "maxAdvanceBookingDays" | "cancellationDeadlineMinutes" | "maxConcurrentBookings" | "checkinGraceMinutes" | "timezone" | "approvedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["cafe"]>
+export type CafeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "name" | "slug" | "description" | "address" | "city" | "phone" | "email" | "status" | "rejectionReason" | "coverImageUrl" | "galleryImages" | "operatingHours" | "amenities" | "slotDurationMinutes" | "minAdvanceBookingMinutes" | "maxAdvanceBookingDays" | "cancellationDeadlineMinutes" | "maxConcurrentBookings" | "checkinGraceMinutes" | "timezone" | "approvedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["cafe"]>
 export type CafeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   zones?: boolean | Prisma.Cafe$zonesArgs<ExtArgs>
@@ -1512,6 +1588,8 @@ export type $CafePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     email: string | null
     status: $Enums.CafeStatus
     rejectionReason: string | null
+    coverImageUrl: string | null
+    galleryImages: runtime.JsonValue
     operatingHours: runtime.JsonValue
     amenities: runtime.JsonValue
     slotDurationMinutes: number
@@ -1961,6 +2039,8 @@ export interface CafeFieldRefs {
   readonly email: Prisma.FieldRef<"Cafe", 'String'>
   readonly status: Prisma.FieldRef<"Cafe", 'CafeStatus'>
   readonly rejectionReason: Prisma.FieldRef<"Cafe", 'String'>
+  readonly coverImageUrl: Prisma.FieldRef<"Cafe", 'String'>
+  readonly galleryImages: Prisma.FieldRef<"Cafe", 'Json'>
   readonly operatingHours: Prisma.FieldRef<"Cafe", 'Json'>
   readonly amenities: Prisma.FieldRef<"Cafe", 'Json'>
   readonly slotDurationMinutes: Prisma.FieldRef<"Cafe", 'Int'>
