@@ -26,7 +26,7 @@ export function createRateLimiter(options: RateLimiterOptions) {
             next();
         } catch (error) {
             console.error('Rate limiter error:', error);
-            next();
+            next(new RateLimitError())
         }
     };
 }
@@ -45,6 +45,13 @@ export const loginRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 10,
   keyPrefix: 'login',
+  keyGenerator: ipKey,
+});
+
+export const registrationUploadRateLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  keyPrefix: 'upload-registration',
   keyGenerator: ipKey,
 });
 
