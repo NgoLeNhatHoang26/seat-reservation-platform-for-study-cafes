@@ -1,2 +1,6 @@
 node_modules/
 .env
+dist/
+tests/load/reports/*
+!tests/load/reports/.gitkeep
+tests/load/k6/load-users.json
