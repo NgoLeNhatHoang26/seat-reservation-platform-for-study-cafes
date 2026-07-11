@@ -3,6 +3,7 @@ export type CafeListItem = {
   name: string;
   slug: string;
   city: string;
+  coverImageUrl?: string | null;
   amenities: unknown;
   totalSeats: number;
   availableSeatsCount?: number;

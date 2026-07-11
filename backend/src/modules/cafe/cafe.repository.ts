@@ -33,6 +33,7 @@ export async function findManyActive(params: ListParams) {
             name: true,
             slug: true,
             city: true,
+            coverImageUrl: true,
             amenities: true,
         }
     })
@@ -53,6 +54,7 @@ export async function searchActive(params: SearchParams) {
             name: true,
             slug: true,
             city: true,
+            coverImageUrl: true,
             amenities: true,
         }
     })
@@ -114,5 +116,25 @@ export async function findOverlappingBookings(
       ...(zoneId ? { seat: { zoneId } } : {}),
     },
     select: { seatId: true },
+  });
+}
+
+export async function findActiveSeatInCafe(seatId: string, cafeId: string) {
+  return prisma.seat.findFirst({
+    where: {
+      id: seatId,
+      deletedAt: null,
+      isActive: true,
+      zone: {
+        cafeId,
+        deletedAt: null,
+        isActive: true,
+      },
+    },
+    select: {
+      id: true,
+      seatNumber: true,
+      zoneId: true,
+    },
   });
 }

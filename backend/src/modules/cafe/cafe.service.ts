@@ -123,6 +123,8 @@ export async function getCafeDetail(cafeId: string) {
         address: cafe.address,
         city: cafe.city,
         phone: cafe.phone,
+        coverImageUrl: cafe.coverImageUrl,
+        galleryImages: cafe.galleryImages,
         amenities: cafe.amenities,
         operatingHours: cafe.operatingHours,
       },
