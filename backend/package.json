@@ -11,7 +11,10 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
-    "test:integration": "vitest run tests/integration"
+    "test:integration": "vitest run tests/integration",
+    "load:prepare": "tsx tests/load/issue-load-tokens.ts",
+    "load:smoke": "k6 run tests/load/k6/smoke.js",
+    "load:booking": "k6 run tests/load/k6/booking-load.js"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -24,6 +27,7 @@
     "@sendgrid/mail": "^8.1.6",
     "bcryptjs": "^3.0.2",
     "bullmq": "^5.66.4",
+    "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",

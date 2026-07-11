@@ -42,8 +42,12 @@ export class ForbiddenError extends AppError {
   }
 }
 export class ConflictError extends AppError {
-  constructor(errorCode: string, message?: string) {
-    super(409, errorCode, message ?? errorCode);
+  constructor(
+    errorCode: string,
+    message?: string,
+    details?: Record<string, unknown>,
+  ) {
+    super(409, errorCode, message ?? errorCode, details);
   }
 }
 export class RateLimitError extends AppError {

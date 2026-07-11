@@ -9,6 +9,13 @@ type Env = {
   JWT_REFRESH_SECRET: string;
   JWT_ACCESS_EXPIRES_IN: string;
   JWT_REFRESH_EXPIRES_IN: string;
+  SENDGRID_API_KEY: string;
+  SENDGRID_FROM_EMAIL: string;
+  ADMIN_NOTIFICATION_EMAIL: string;
+  FRONTEND_URL: string;
+  CLOUDINARY_CLOUD_NAME: string;
+  CLOUDINARY_API_KEY: string;
+  CLOUDINARY_API_SECRET: string;
 };
 
 function validateEnv(): Env {
@@ -29,6 +36,13 @@ function validateEnv(): Env {
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET!,
     JWT_ACCESS_EXPIRES_IN: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
     JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
+    SENDGRID_API_KEY: process.env.SENDGRID_API_KEY ?? '',
+    SENDGRID_FROM_EMAIL: process.env.SENDGRID_FROM_EMAIL ?? 'noreply@localhost',
+    ADMIN_NOTIFICATION_EMAIL: process.env.ADMIN_NOTIFICATION_EMAIL ?? '',
+    FRONTEND_URL: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ?? '',
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ?? '',
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ?? '',
   };
 }
 

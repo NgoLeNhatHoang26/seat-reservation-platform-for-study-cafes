@@ -6,7 +6,7 @@ type SuccessBody<T> = {
   data: T;
 };
 
-type PaginatedData<T> = {
+export type PaginatedData<T> = {
   items: T[];
   nextCursor: string | null;
   hasMore: boolean;

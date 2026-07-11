@@ -8,6 +8,8 @@ export const TTL = {
   AVAILABILITY: 30,
 } as const;
 
+export const IDEMPOTENCY_TTL_SECONDS = 60 * 60;
+
 export async function getFromCache<T>(key: string): Promise<T | null> {
     try {
         const raw = await redis.get(key);
@@ -30,7 +32,26 @@ export async function deleteFromCache(key: string): Promise<void> {
     try {
       await redis.del(key);
     } catch { }
+}
+
+export function buildIdempotencyKey(scope: string, key: string) {
+  return `idempotency:${scope}:${key}`;
+}
+export function buildBookingIdempotencyKey(idempotencyKey: string) {
+  return buildIdempotencyKey('booking', idempotencyKey);
+}
+export async function deleteByPattern(pattern: string): Promise<void> {
+  try {
+    let cursor = '0';
+    do {
+      const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+      cursor = nextCursor;
+      if (keys.length > 0) await redis.unlink(...keys);
+    } while (cursor !== '0');
+  } catch {
+    // degrade gracefully
   }
+}
 
 export function buildParamsHash(params: Record<string, unknown>): string {
   const sorted = Object.keys(params)

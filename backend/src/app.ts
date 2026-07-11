@@ -15,7 +15,7 @@ app.use(
     cors({
         origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
         credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
         allowedHeaders: ['Content-Type', 'Authorization','Idempotency-Key'],
     })
 );
