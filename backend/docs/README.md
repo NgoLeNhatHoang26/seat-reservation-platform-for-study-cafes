@@ -32,7 +32,7 @@ Tài liệu cho **Cafe Reservation Backend API** — nền tảng đặt chỗ n
 | [TESTING.md](./TESTING.md) | Unit, integration, load test strategy |
 | [IMPLEMENTATION-ROADMAP.md](./IMPLEMENTATION-ROADMAP.md) | Roadmap triển khai theo phase |
 
-Frontend docs vẫn ở [`../../docs/`](../../docs/) (UI/UX, frontend architecture).
+Frontend docs ở [`../../frontend/docs/`](../../frontend/docs/README.md) (overview, architecture, UI/UX).
 
 ---
 

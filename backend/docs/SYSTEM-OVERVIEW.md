@@ -259,7 +259,7 @@ tests/
 | [CACHE-DESIGN.md](./CACHE-DESIGN.md) | Cache keys, TTL, invalidation, failure behaviour |
 | [QUEUE-DESIGN.md](./QUEUE-DESIGN.md) | BullMQ topology, jobs, delays, cancellation |
 | [TESTING.md](./TESTING.md) | Unit, integration, load test strategy |
-| [DEPLOYMENT.md](../../docs/DEPLOYMENT.md) | Deploy runbook *(planned)* — repo root `docs/` |
+| [README.md](../../README.md) | Hướng dẫn cài đặt & chạy (Docker + local) |
 
 ---
 
