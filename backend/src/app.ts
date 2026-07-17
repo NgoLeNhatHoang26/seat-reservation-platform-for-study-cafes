@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import morgan from 'morgan';
 import { errorHandler } from './middleware/errorHandler';
 import { requestIdMiddleware } from './middleware/requestId';
@@ -7,6 +8,8 @@ import router from './routes/index';
 
 const app = express();
 
+app.disable('x-powered-by');
+app.use(helmet());
 app.use(requestIdMiddleware);
 app.use(morgan('dev'));
 
