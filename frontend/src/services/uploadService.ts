@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 import { axiosInstance } from './axiosInstance';
 
 type CloudinarySignatureResponse = {
@@ -70,7 +71,7 @@ export async function uploadRegistrationImage(params: {
 
   const { data: signatureEnvelope } = await axios.post<{
     data: CloudinarySignatureResponse;
-  }>('/api/v1/uploads/cloudinary/signature/registration', {
+  }>(`${API_BASE_URL}/uploads/cloudinary/signature/registration`, {
     publicId: `${params.docType}-${Date.now()}-${suffix}`,
   });
 

@@ -1,4 +1,5 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 let _getAccessToken: (() => string | null) | null = null;
 let _setAccessToken: ((token: string | null) => void) | null = null;
@@ -86,7 +87,7 @@ axiosInstance.interceptors.response.use(
         // Use plain axios to avoid interceptor recursion
         const { data } = await axios.post<{
           data: { tokens: { accessToken: string; refreshToken: string } };
-        }>('/api/v1/auth/refresh', { refreshToken: storedRefreshToken });
+        }>(`${API_BASE_URL}/auth/refresh`, { refreshToken: storedRefreshToken });
 
         const newAccessToken = data.data.tokens.accessToken;
         const newRefreshToken = data.data.tokens.refreshToken;

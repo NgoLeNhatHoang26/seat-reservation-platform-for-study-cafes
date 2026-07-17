@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 import { axiosInstance } from './axiosInstance';
 import type {
   AuthResponse,
@@ -41,7 +42,7 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
 // Uses plain axios (no interceptors) to avoid infinite retry loop.
 export async function refresh(refreshToken: string): Promise<RefreshResponse> {
   const { data } = await axios.post<{ data: RefreshResponse }>(
-    '/api/v1/auth/refresh',
+    `${API_BASE_URL}/auth/refresh`,
     { refreshToken },
   );
   return data.data;
