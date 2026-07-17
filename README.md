@@ -2,6 +2,16 @@
 
 Nền tảng đặt chỗ ngồi học tại quán cà phê — full-stack web app với REST API, xử lý booking đồng thời, background jobs và phân quyền theo vai trò.
 
+## Live demo
+
+| | URL |
+| --- | --- |
+| **Frontend** | [https://seat-reservation-liard.vercel.app](https://seat-reservation-liard.vercel.app) |
+| **Backend API** | [https://seat-reservation-api.onrender.com/api/v1](https://seat-reservation-api.onrender.com/api/v1) |
+| **Health check** | [https://seat-reservation-api.onrender.com/health](https://seat-reservation-api.onrender.com/health) |
+
+Đăng nhập thử với [tài khoản demo](#tài-khoản-demo-sau-seed) bên dưới (admin / owner / customer).
+
 ---
 
 ## Giới thiệu
