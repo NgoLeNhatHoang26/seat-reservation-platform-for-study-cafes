@@ -239,7 +239,23 @@ async function seedCustomer() {
   return customer;
 }
 
+function assertSeedAllowed(): void {
+  const nodeEnv = process.env.NODE_ENV ?? "development";
+  const allowDemoSeed = process.env.ALLOW_DEMO_SEED === "true";
+
+  if (nodeEnv === "production" && !allowDemoSeed) {
+    console.error(
+      "Refusing to seed in production. Demo accounts use well-known passwords.",
+    );
+    console.error(
+      "Set ALLOW_DEMO_SEED=true only for explicit local/demo deployments.",
+    );
+    process.exit(1);
+  }
+}
+
 async function main() {
+  assertSeedAllowed();
   console.log("Seeding...");
   await seedAdmin();
   await seedOwnerAndCafe();
