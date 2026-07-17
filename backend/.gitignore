@@ -4,3 +4,7 @@ dist/
 tests/load/reports/*
 !tests/load/reports/.gitkeep
 tests/load/k6/load-users.json
+prisma/seed.js
+prisma/seed.d.ts
+prisma/seed.js.map
+prisma/seed.d.ts.map
