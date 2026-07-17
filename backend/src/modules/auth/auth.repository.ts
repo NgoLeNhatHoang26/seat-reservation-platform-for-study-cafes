@@ -24,7 +24,7 @@ export type UserWithProfile = User & {
   ownerProfile: OwnerProfile | null;
 };
 
-/** Tìm user theo email, chỉ lấy bản ghi chưa bị soft-delete. */
+
 export async function findUserByEmail(email: string): Promise<UserWithProfile | null> {
   return prisma.user.findFirst({
     where: {
