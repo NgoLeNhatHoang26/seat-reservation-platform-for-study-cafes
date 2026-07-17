@@ -3,8 +3,6 @@ import { sendSuccess } from '../../common/response';
 import * as uploadService from './upload.service';
 import type { CreateCloudinarySignatureBody, RegistrationUploadSignatureBody } from './upload.validator';
 
-const OWNER_VERIFICATION_FOLDER = 'owner-verification';
-
 export function createCloudinarySignature(
   req: Request,
   res: Response,
@@ -27,10 +25,7 @@ export function createRegistrationCloudinarySignature(
 ): void {
   try {
     const body = req.body as RegistrationUploadSignatureBody;
-    const data = uploadService.createCloudinaryUploadSignature({
-      folder: OWNER_VERIFICATION_FOLDER,
-      publicId: body.publicId,
-    });
+    const data = uploadService.createRegistrationCloudinaryUploadSignature(body.docType);
     sendSuccess(res, data, 'Cloudinary upload signature created');
   } catch (err) {
     next(err);

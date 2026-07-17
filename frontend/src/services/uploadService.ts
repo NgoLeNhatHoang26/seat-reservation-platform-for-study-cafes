@@ -61,18 +61,10 @@ export async function uploadRegistrationImage(params: {
   file: File;
   docType: 'business-license' | 'id-card';
 }): Promise<UploadedImage> {
-  const suffix = params.file.name
-    .replace(/\.[^/.]+$/, '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9_-]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 40);
-
   const { data: signatureEnvelope } = await axios.post<{
     data: CloudinarySignatureResponse;
   }>(`${API_BASE_URL}/uploads/cloudinary/signature/registration`, {
-    publicId: `${params.docType}-${Date.now()}-${suffix}`,
+    docType: params.docType,
   });
 
   const signature = signatureEnvelope.data;

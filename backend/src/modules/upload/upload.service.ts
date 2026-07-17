@@ -1,12 +1,26 @@
+import { randomUUID } from 'crypto';
 import { getCloudinary, getCloudinaryConfig } from '../../common/cloudinary';
-import type { CreateCloudinarySignatureBody } from './upload.validator';
+import type {
+  CreateCloudinarySignatureBody,
+  RegistrationDocType,
+} from './upload.validator';
 
-export function createCloudinaryUploadSignature(body: CreateCloudinarySignatureBody) {
+const OWNER_VERIFICATION_FOLDER = 'owner-verification';
+
+type SignatureOptions = {
+  overwrite?: boolean;
+};
+
+export function createCloudinaryUploadSignature(
+  body: CreateCloudinarySignatureBody,
+  options: SignatureOptions = {},
+) {
+  const overwrite = options.overwrite ?? true;
   const timestamp = Math.round(Date.now() / 1000);
   const paramsToSign = {
     allowed_formats: 'jpg,jpeg,png,webp',
     folder: body.folder,
-    overwrite: true,
+    overwrite,
     timestamp,
     ...(body.publicId ? { public_id: body.publicId } : {}),
   };
@@ -24,7 +38,19 @@ export function createCloudinaryUploadSignature(body: CreateCloudinarySignatureB
     signature,
     folder: body.folder,
     allowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
-    overwrite: true,
+    overwrite,
     ...(body.publicId ? { publicId: body.publicId } : {}),
   };
+}
+
+export function createRegistrationCloudinaryUploadSignature(docType: RegistrationDocType) {
+  const publicId = `${docType}-${randomUUID()}`;
+
+  return createCloudinaryUploadSignature(
+    {
+      folder: OWNER_VERIFICATION_FOLDER,
+      publicId,
+    },
+    { overwrite: false },
+  );
 }
