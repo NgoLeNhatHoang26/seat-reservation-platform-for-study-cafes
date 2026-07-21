@@ -5,11 +5,13 @@ import {
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
+  ValidationError,
 } from '../../common/errors';
 import { env } from '../../config/env';
 import { OwnerVerificationStatus, UserRole, UserStatus } from '../../generated/prisma/enums';
 import type { User } from '../../generated/prisma/client';
 import type { UserWithProfile } from './auth.repository';
+import * as cache from '../../common/cache';
 import * as bookingRepo from '../booking/booking.repository';
 import * as bookingQueue from '../booking/booking-queue.service';
 import type {
@@ -18,7 +20,9 @@ import type {
   MeResponse,
   RegisterCustomerDto,
   RegisterOwnerDto,
+  ResendVerificationResponse,
   UserResponse,
+  VerifyEmailResponse,
 } from './auth.dto';
 import * as authRepo from './auth.repository';
 import * as jwtService from './jwt.service';
@@ -92,7 +96,10 @@ export async function registerCustomer(dto: RegisterCustomerDto) {
     preferredCity: dto.preferredCity,
   });
 
-  const tokens = await issueTokens(user);
+  const verificationToken = randomUUID();
+  await cache.storeEmailVerificationToken(user.id, user.email, verificationToken);
+  await bookingQueue.enqueueVerificationEmail(user.id, user.email, verificationToken);
+  const tokens = await issueTokens(user); 
 
   return {
     user: toUserResponse(user),
@@ -118,6 +125,7 @@ export async function registerOwner(dto: RegisterOwnerDto) {
 
   try {
     const verificationToken = randomUUID();
+    await cache.storeEmailVerificationToken(user.id, user.email, verificationToken);
     await bookingQueue.enqueueVerificationEmail(user.id, user.email, verificationToken);
   } catch (error) {
     console.warn('Failed to enqueue verification email', error);
@@ -189,7 +197,13 @@ export async function refreshToken(refreshTokenValue: string): Promise<{ tokens:
   }
 
   const stored = await jwtService.getRefreshToken(payload.id, payload.tokenId);
-  if (!stored || stored !== refreshTokenValue) {
+  if (!stored) {
+    await jwtService.revokeAllUserTokens(payload.id);
+    throw new UnauthorizedError('AUTH_REFRESH_TOKEN_INVALID');
+  }
+  
+  if (stored !== refreshTokenValue) {
+    await jwtService.revokeAllUserTokens(payload.id);
     throw new UnauthorizedError('AUTH_REFRESH_TOKEN_INVALID');
   }
 
@@ -239,4 +253,80 @@ export async function getCurrentUser(userId: string): Promise<MeResponse> {
   }
 
   return response;
+}
+
+export async function verifyEmail(token: string): Promise<VerifyEmailResponse> {
+  const payload = await cache.consumeEmailVerificationToken(token);
+  if (!payload) {
+    throw new ValidationError(
+      'TOKEN_INVALID_OR_EXPIRED',
+      'Verification link is invalid or expired',
+    );
+  }
+
+  const user = await authRepo.findUserById(payload.userId);
+  if (!user || user.email !== payload.email) {
+    throw new ValidationError(
+      'TOKEN_INVALID_OR_EXPIRED',
+      'Verification link is invalid or expired',
+    );
+  }
+
+  if (user.emailVerifiedAt) {
+    return {
+      user: toUserResponse(user),
+      message: 'Email already verified',
+    };
+  }
+
+  const activateAccount = user.role === UserRole.CUSTOMER;
+  const updated = await authRepo.markEmailVerified(user.id, activateAccount);
+
+  try {
+    await bookingRepo.createAuditLog({
+      actorId: user.id,
+      action: 'EMAIL_VERIFIED',
+      resourceType: 'user',
+      resourceId: user.id,
+    });
+  } catch (error) {
+    console.warn('Failed to write email verified audit log', error);
+  }
+
+  return {
+    user: toUserResponse(updated),
+    message: 'Email verified successfully',
+  };
+}
+
+export async function resendVerificationEmail(
+  userId: string,
+): Promise<ResendVerificationResponse> {
+  const user = await authRepo.findUserById(userId);
+  if (!user) {
+    throw new NotFoundError('USER_NOT_FOUND');
+  }
+
+  if (user.status === UserStatus.SUSPENDED) {
+    throw new ForbiddenError('ACCOUNT_SUSPENDED');
+  }
+
+  if (user.emailVerifiedAt) {
+    return { message: 'Email already verified' };
+  }
+
+  const verificationToken = randomUUID();
+  await cache.storeEmailVerificationToken(user.id, user.email, verificationToken);
+
+  try {
+    await bookingQueue.enqueueVerificationEmail(user.id, user.email, verificationToken);
+  } catch (error) {
+    console.warn('Failed to enqueue verification email', error);
+    throw new ConflictError(
+      'EMAIL_DELIVERY_FAILED',
+      'Could not queue verification email. Please try again later.',
+    );
+  }
+
+  return { message: 'Verification email sent' };
 }

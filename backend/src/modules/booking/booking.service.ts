@@ -1,5 +1,5 @@
 import { ValidationError, ConflictError, NotFoundError, ForbiddenError } from '../../common/errors';
-import { CafeStatus, UserRole } from '../../generated/prisma/enums';
+import { CafeStatus, UserRole, UserStatus } from '../../generated/prisma/enums';
 import * as cafeRepo from '../cafe/cafe.repository';
 import * as bookingRepo from './booking.repository';
 import { prisma } from '../../config/prisma';
@@ -12,6 +12,7 @@ import * as bookingQueue from './booking-queue.service';
 import type { CreateBookingDto, BookingResponse, ListBookingsParams } from './booking.dto';
 import { buildCursorPaginationResult } from '../../common/pagination';
 import { toBookingResponse, toBookingListItem } from './booking.mapper';
+import * as authRepo from '../auth/auth.repository';
 
 type DaySchedule = { open: string; close: string };
 type OperatingHours = Record<string, DaySchedule>;
@@ -172,15 +173,29 @@ export async function createBooking(
   dto: CreateBookingDto,
   idempotencyKey: string,
 ): Promise<BookingResponse> {
-  // ── 1) Idempotency (TRƯỚC TX) ──
-  const idemKey = cache.buildBookingIdempotencyKey(idempotencyKey);
-  const cached = await cache.getFromCache<BookingResponse>(idemKey);
+  // Idempotency
+  const idemKey = cache.buildBookingIdempotencyKey(customerId, idempotencyKey);
+  let cached = await cache.getFromCache<BookingResponse>(idemKey);
   if (cached) return cached;
 
+  const customer = await authRepo.findUserById(customerId);
+  if (!customer || customer.status !== UserStatus.ACTIVE) {
+    throw new ForbiddenError('EMAIL_NOT_VERIFIED', 'Please verify your email before booking');
+  }
+  
   const start = new Date(dto.startTime);
   const end = new Date(dto.endTime);
 
-  // ── 2) Load café + seat ──
+  const lockAcquired = await cache.acquireIdempotencyLock(idemKey);
+  if (!lockAcquired) {
+    throw new ConflictError('IDEMPOTENCY_IN_PROGRESS');
+  }
+  try {
+    cached = await cache.getFromCache<BookingResponse>(idemKey);
+    if (cached) return cached;
+
+
+  //Load café + seat 
   const cafe = await cafeRepo.findById(dto.cafeId);
   if (!cafe) throw new NotFoundError('CAFE_NOT_FOUND');
   if (cafe.status !== CafeStatus.ACTIVE) {
@@ -190,7 +205,7 @@ export async function createBooking(
   const seat = await cafeRepo.findActiveSeatInCafe(dto.seatId, dto.cafeId);
   if (!seat) throw new NotFoundError('SEAT_NOT_FOUND');
 
-  // ── 3) Validation (TRƯỚC TX) ──
+  // Validation (TRƯỚC TX)
   await validateTimeSlot(dto.cafeId, start, end);
   await validateCustomerActiveBookings(
     customerId,
@@ -199,7 +214,7 @@ export async function createBooking(
   );
   await validateCustomerNoOverlap(customerId, start, end);
 
-  // ── 4) Transaction (CHỈ DB) ──
+  // Transaction (CHỈ DB)
   let booking;
   try {
     booking = await prisma.$transaction(
@@ -265,6 +280,7 @@ export async function createBooking(
       { timeout: 5000 },
     );
   } catch (err) {
+    await cache.releaseIdempotencyLock(idemKey);
     if (
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === 'P2002'
@@ -280,8 +296,7 @@ export async function createBooking(
     name: cafe.name,
     timezone: cafe.timezone,
   });
-
-  // ── 5) Post-commit (SAU TX) ──
+  // Post-commit (SAU TX)
   try {
     await cache.deleteByPattern(`availability:${dto.cafeId}:*`);
   } catch (e) {
@@ -308,7 +323,11 @@ export async function createBooking(
   }
 
   return response;
-}
+  } finally {
+  if (lockAcquired) {
+    await cache.releaseIdempotencyLock(idemKey);
+  }
+}}
 
 async function assertCanViewBooking(
   booking: { customerId: string; cafeId: string },

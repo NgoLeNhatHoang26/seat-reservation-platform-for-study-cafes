@@ -25,6 +25,27 @@ export type UserWithProfile = User & {
 };
 
 
+export type AuthUserSnapshot = {
+  id: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  lockedUntil: Date | null;
+};
+
+export async function findAuthUserById(id: string): Promise<AuthUserSnapshot | null> {
+  return prisma.user.findFirst({
+    where: { id, deletedAt: null },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      status: true,
+      lockedUntil: true,
+    },
+  });
+}
+
 export async function findUserByEmail(email: string): Promise<UserWithProfile | null> {
   return prisma.user.findFirst({
     where: {
@@ -52,10 +73,6 @@ export async function findUserById(id: string): Promise<UserWithProfile | null> 
   });
 }
 
-/**
- * Tạo CUSTOMER + customer_profile + audit log trong một transaction.
- * Nếu bất kỳ bước nào fail → toàn bộ rollback.
- */
 export async function createUserWithProfile(
   data: CreateUserWithProfileData,
 ): Promise<{ user: User; profile: CustomerProfile }> {
@@ -67,8 +84,8 @@ export async function createUserWithProfile(
         fullName: data.fullName,
         phone: data.phone,
         role: UserRole.CUSTOMER,
-        status: UserStatus.ACTIVE,
-        emailVerifiedAt: new Date(),
+        status: UserStatus.PENDING_EMAIL_VERIFICATION,
+        emailVerifiedAt: null,
       },
     });
 
@@ -162,13 +179,12 @@ export async function updateUserStatus(userId: string, status: UserStatus): Prom
   });
 }
 
-/** Đánh dấu email đã xác minh và chuyển status sang ACTIVE. */
-export async function updateEmailVerifiedAt(userId: string): Promise<User> {
+export async function markEmailVerified(userId: string, activateAccount: boolean): Promise<User> {
   return prisma.user.update({
     where: { id: userId },
     data: {
       emailVerifiedAt: new Date(),
-      status: UserStatus.ACTIVE,
+      ...(activateAccount ? { status: UserStatus.ACTIVE } : {}),
     },
   });
 }

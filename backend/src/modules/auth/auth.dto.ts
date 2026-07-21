@@ -67,3 +67,16 @@ export type RegisterOwnerResponse = {
   user: UserResponse;
   message: string;
 };
+
+export type VerifyEmailDto = {
+  token: string;
+};
+
+export type VerifyEmailResponse = {
+  user: UserResponse;
+  message: string;
+};
+
+export type ResendVerificationResponse = {
+  message: string;
+};

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../../middleware/authenticate';
-import { loginRateLimiter, registerRateLimiter } from '../../middleware/rateLimiter';
+import { loginRateLimiter, registerRateLimiter, refreshRateLimiter } from '../../middleware/rateLimiter';
 import { validateBody } from '../../middleware/validate';
 import * as controller from './auth.controller';
 import {
@@ -8,6 +8,7 @@ import {
   refreshTokenSchema,
   registerCustomerSchema,
   registerOwnerSchema,
+  verifyEmailSchema,
 } from './auth.validator';
 
 const router = Router();
@@ -28,7 +29,7 @@ router.post(
 
 router.post('/login', loginRateLimiter, validateBody(loginSchema), controller.login);
 
-router.post('/refresh', validateBody(refreshTokenSchema), controller.refresh);
+router.post('/refresh',refreshRateLimiter, validateBody(refreshTokenSchema), controller.refresh);
 
 router.post(
   '/logout',
@@ -38,5 +39,17 @@ router.post(
 );
 
 router.get('/me', authenticate, controller.getMe);
+
+router.post(
+  '/verify-email',
+  validateBody(verifyEmailSchema),
+  controller.verifyEmail,
+);
+
+router.post(
+  '/resend-verification',
+  authenticate,
+  controller.resendVerification,
+);
 
 export default router;

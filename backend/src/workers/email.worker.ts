@@ -82,6 +82,11 @@ async function loadBookingContext(bookingId: string, customerId: string) {
 
   return { booking, customer };
 }
+async function shouldSendMarketingEmail(userId: string): Promise<boolean> {
+  const user = await authRepo.findUserById(userId);
+  if (!user?.customerProfile) return true;
+  return user.customerProfile.emailNotifications;
+}
 
 async function sendAndLog(input: {
   userId: string;
@@ -90,9 +95,21 @@ async function sendAndLog(input: {
   to: string;
   subject: string;
   html: string;
-  /** Booking events also write IN_APP so the notification bell is not empty. */
+  checkPreference?: boolean;
   alsoInApp?: boolean;
 }): Promise<void> {
+  if (input.checkPreference !== false) {
+    const allowed = await shouldSendMarketingEmail(input.userId);
+    if (!allowed) {
+      await logNotification({
+        ...input,
+        status: NotificationStatus.SKIPPED,
+        recipient: input.to,
+        errorMessage: 'User disabled email notifications',
+      });
+      return;
+    }
+  }
   await sendEmail({ to: input.to, subject: input.subject, html: input.html });
 
   await logNotification({
@@ -234,6 +251,7 @@ export async function sendVerificationEmail(
       <p>Vui lòng xác minh email bằng cách nhấn link bên dưới:</p>
       <p><a href="${verifyUrl}">${verifyUrl}</a></p>
     `,
+    checkPreference: false,
   });
 }
 
@@ -256,6 +274,7 @@ export async function sendAccountSuspendedEmail(
       <p>Tài khoản của bạn đã bị tạm khóa.</p>
       <p>Lý do: ${data.reason}</p>
     `,
+    checkPreference: false,
   });
 }
 

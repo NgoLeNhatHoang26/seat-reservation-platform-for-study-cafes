@@ -6,6 +6,7 @@ import type {
   RefreshTokenDto,
   RegisterCustomerDto,
   RegisterOwnerDto,
+  VerifyEmailDto,
 } from './auth.dto';
 import * as authService from './auth.service';
 
@@ -93,6 +94,34 @@ export async function getMe(
     const user = requireUser(req);
     const result = await authService.getCurrentUser(user.id);
     sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function verifyEmail(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const { token } = req.body as VerifyEmailDto;
+    const result = await authService.verifyEmail(token);
+    sendSuccess(res, result, result.message);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function resendVerification(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const user = requireUser(req);
+    const result = await authService.resendVerificationEmail(user.id);
+    sendSuccess(res, result, result.message);
   } catch (err) {
     next(err);
   }

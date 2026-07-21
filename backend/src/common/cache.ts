@@ -10,6 +10,24 @@ export const TTL = {
 
 export const IDEMPOTENCY_TTL_SECONDS = 60 * 60;
 
+const IDEMPOTENCY_LOCK_TTL_SECONDS = 30;
+
+const EMAIL_VERIFY_TTL = 24 * 60 * 60;
+
+export async function acquireIdempotencyLock(key: string): Promise<boolean> {
+  try {
+    const result = await redis.set(`${key}:lock`, '1', 'EX', IDEMPOTENCY_LOCK_TTL_SECONDS, 'NX');
+    return result === 'OK';
+  } catch {
+    return false; 
+  }
+}
+export async function releaseIdempotencyLock(key: string): Promise<void> {
+  try {
+    await redis.del(`${key}:lock`);
+  } catch {}
+}
+
 export async function getFromCache<T>(key: string): Promise<T | null> {
     try {
         const raw = await redis.get(key);
@@ -37,8 +55,8 @@ export async function deleteFromCache(key: string): Promise<void> {
 export function buildIdempotencyKey(scope: string, key: string) {
   return `idempotency:${scope}:${key}`;
 }
-export function buildBookingIdempotencyKey(idempotencyKey: string) {
-  return buildIdempotencyKey('booking', idempotencyKey);
+export function buildBookingIdempotencyKey(customerId: string, idempotencyKey: string) {
+  return buildIdempotencyKey('booking', `${customerId}:${idempotencyKey}`);
 }
 export async function deleteByPattern(pattern: string): Promise<void> {
   try {
@@ -82,4 +100,27 @@ export function buildAvailabilityKey(cafeId: string, date: string, slotHash: str
 
 export function buildSlotHash(startTime: string, endTime: string) {
   return createHash('sha256').update(`${startTime}|${endTime}`).digest('hex').slice(0, 12);
+}
+
+export async function storeEmailVerificationToken(
+  userId: string,
+  email: string,
+  token: string,
+): Promise<void> {
+  const old = await redis.get(`email-verify:user:${userId}`);
+  if (old) await redis.del(`email-verify:${old}`);
+  await redis.setex(
+    `email-verify:${token}`,
+    EMAIL_VERIFY_TTL,
+    JSON.stringify({ userId, email }),
+  );
+  await redis.setex(`email-verify:user:${userId}`, EMAIL_VERIFY_TTL, token);
+}
+export async function consumeEmailVerificationToken(token: string) {
+  const raw = await redis.get(`email-verify:${token}`);
+  if (!raw) return null;
+  const payload = JSON.parse(raw) as { userId: string; email: string };
+  await redis.del(`email-verify:${token}`);
+  await redis.del(`email-verify:user:${payload.userId}`);
+  return payload;
 }
