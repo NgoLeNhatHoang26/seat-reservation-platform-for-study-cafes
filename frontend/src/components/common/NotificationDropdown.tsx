@@ -19,6 +19,7 @@ import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import NotificationsActiveOutlinedIcon from '@mui/icons-material/NotificationsActiveOutlined';
 import { useNotificationContext } from '../../contexts/NotificationContext';
 import {
+  NOTIFICATION_LIST_PARAMS,
   useMarkNotificationRead,
   useNotificationsList,
 } from '../../hooks/useNotifications';
@@ -134,7 +135,7 @@ export default function NotificationDropdown() {
     data,
     isLoading,
     isError,
-  } = useNotificationsList({ enabled: open });
+  } = useNotificationsList({ ...NOTIFICATION_LIST_PARAMS, enabled: open });
 
   const { mutate: markRead, variables: markingId, isPending: isMarking } = useMarkNotificationRead();
 

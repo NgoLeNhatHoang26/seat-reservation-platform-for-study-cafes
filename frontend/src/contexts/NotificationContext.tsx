@@ -6,8 +6,11 @@ import {
 } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
+import {
+  NOTIFICATION_LIST_PARAMS,
+  queryKeys,
+} from '../lib/queryKeys';
 import * as notificationService from '../services/notificationService';
-import { NOTIFICATIONS_QUERY_KEY } from '../hooks/useNotifications';
 
 export interface NotificationContextValue {
   unreadCount: number;
@@ -22,8 +25,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
 
   const { data } = useQuery({
-    queryKey: [...NOTIFICATIONS_QUERY_KEY, {}],
-    queryFn: () => notificationService.getNotifications({ limit: 20 }),
+    queryKey: queryKeys.notifications.list(NOTIFICATION_LIST_PARAMS),
+    queryFn: () => notificationService.getNotifications(NOTIFICATION_LIST_PARAMS),
     enabled: isAuthenticated,
     staleTime: 0,
     select: (d) => d.unreadCount,
@@ -32,7 +35,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const unreadCount = data ?? 0;
 
   const refetchNotifications = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
   }, [queryClient]);
 
   return (

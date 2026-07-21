@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../lib/queryKeys';
 import * as adminService from '../services/adminService';
 import type {
   ApproveCafePayload,
@@ -9,22 +10,9 @@ import type {
   SuspendUserPayload,
 } from '../types/admin.types';
 
-// All keys nested under ['admin'] for targeted invalidation.
-
-export const adminKeys = {
-  users: (params?: GetAdminUsersParams) =>
-    ['admin', 'users', params ?? {}] as const,
-  user: (userId: string) => ['admin', 'users', userId] as const,
-  pendingCafes: () => ['admin', 'cafes', 'pending'] as const,
-  pendingOwners: () => ['admin', 'owners', 'pending'] as const,
-  owner: (userId: string) => ['admin', 'owners', userId] as const,
-  cafe: (cafeId: string) => ['admin', 'cafes', cafeId] as const,
-  cafeLayout: (cafeId: string) => ['admin', 'cafes', cafeId, 'layout'] as const,
-};
-
 export function useAdminUsers(params?: GetAdminUsersParams) {
   return useQuery({
-    queryKey: adminKeys.users(params),
+    queryKey: queryKeys.admin.users(params),
     queryFn: () => adminService.listAdminUsers(params),
     staleTime: 0,
   });
@@ -32,7 +20,7 @@ export function useAdminUsers(params?: GetAdminUsersParams) {
 
 export function useAdminUserDetail(userId: string) {
   return useQuery({
-    queryKey: adminKeys.user(userId),
+    queryKey: queryKeys.admin.user(userId),
     queryFn: () => adminService.getAdminUser(userId),
     staleTime: 0,
     enabled: !!userId,
@@ -41,7 +29,7 @@ export function useAdminUserDetail(userId: string) {
 
 export function useAdminPendingCafes(params?: { limit?: number; cursor?: string }) {
   return useQuery({
-    queryKey: adminKeys.pendingCafes(),
+    queryKey: queryKeys.admin.pendingCafes(params),
     queryFn: () => adminService.listPendingCafes(params),
     staleTime: 0,
   });
@@ -49,7 +37,7 @@ export function useAdminPendingCafes(params?: { limit?: number; cursor?: string 
 
 export function useAdminCafeDetail(cafeId: string | null) {
   return useQuery({
-    queryKey: adminKeys.cafe(cafeId ?? ''),
+    queryKey: queryKeys.admin.cafe(cafeId ?? ''),
     queryFn: () => adminService.getAdminCafeDetail(cafeId!),
     staleTime: 0,
     enabled: !!cafeId,
@@ -58,7 +46,7 @@ export function useAdminCafeDetail(cafeId: string | null) {
 
 export function useAdminCafeSeatLayout(cafeId: string | null) {
   return useQuery({
-    queryKey: adminKeys.cafeLayout(cafeId ?? ''),
+    queryKey: queryKeys.admin.cafeLayout(cafeId ?? ''),
     queryFn: () => adminService.getAdminCafeSeatLayout(cafeId!),
     staleTime: 0,
     enabled: !!cafeId,
@@ -67,7 +55,7 @@ export function useAdminCafeSeatLayout(cafeId: string | null) {
 
 export function useAdminPendingOwners(params?: { limit?: number; cursor?: string }) {
   return useQuery({
-    queryKey: adminKeys.pendingOwners(),
+    queryKey: queryKeys.admin.pendingOwners(params),
     queryFn: () => adminService.listPendingOwners(params),
     staleTime: 0,
   });
@@ -75,7 +63,7 @@ export function useAdminPendingOwners(params?: { limit?: number; cursor?: string
 
 export function useAdminOwnerDetail(userId: string | null) {
   return useQuery({
-    queryKey: adminKeys.owner(userId ?? ''),
+    queryKey: queryKeys.admin.owner(userId ?? ''),
     queryFn: () => adminService.getAdminOwnerDetail(userId!),
     staleTime: 0,
     enabled: !!userId,
@@ -88,8 +76,8 @@ export function useSuspendUser() {
     mutationFn: ({ userId, payload }: { userId: string; payload: SuspendUserPayload }) =>
       adminService.suspendUser(userId, payload),
     onSuccess: (_data, { userId }) => {
-      qc.invalidateQueries({ queryKey: adminKeys.users() });
-      qc.invalidateQueries({ queryKey: adminKeys.user(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.usersAll() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.user(userId) });
     },
   });
 }
@@ -99,8 +87,8 @@ export function useUnsuspendUser() {
   return useMutation({
     mutationFn: (userId: string) => adminService.unsuspendUser(userId),
     onSuccess: (_data, userId) => {
-      qc.invalidateQueries({ queryKey: adminKeys.users() });
-      qc.invalidateQueries({ queryKey: adminKeys.user(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.usersAll() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.user(userId) });
     },
   });
 }
@@ -111,7 +99,7 @@ export function useApproveCafe() {
     mutationFn: ({ cafeId, payload }: { cafeId: string; payload?: ApproveCafePayload }) =>
       adminService.approveCafe(cafeId, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: adminKeys.pendingCafes() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.pendingCafesAll() });
     },
   });
 }
@@ -122,7 +110,7 @@ export function useRejectCafe() {
     mutationFn: ({ cafeId, payload }: { cafeId: string; payload: RejectCafePayload }) =>
       adminService.rejectCafe(cafeId, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: adminKeys.pendingCafes() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.pendingCafesAll() });
     },
   });
 }
@@ -133,9 +121,9 @@ export function useApproveOwner() {
     mutationFn: ({ userId, payload }: { userId: string; payload?: ApproveOwnerPayload }) =>
       adminService.approveOwner(userId, payload),
     onSuccess: (_data, { userId }) => {
-      qc.invalidateQueries({ queryKey: adminKeys.pendingOwners() });
-      qc.invalidateQueries({ queryKey: adminKeys.owner(userId) });
-      qc.invalidateQueries({ queryKey: adminKeys.users() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.pendingOwnersAll() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.owner(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.usersAll() });
     },
   });
 }
@@ -146,9 +134,9 @@ export function useRejectOwner() {
     mutationFn: ({ userId, payload }: { userId: string; payload: RejectOwnerPayload }) =>
       adminService.rejectOwner(userId, payload),
     onSuccess: (_data, { userId }) => {
-      qc.invalidateQueries({ queryKey: adminKeys.pendingOwners() });
-      qc.invalidateQueries({ queryKey: adminKeys.owner(userId) });
-      qc.invalidateQueries({ queryKey: adminKeys.users() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.pendingOwnersAll() });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.owner(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.admin.usersAll() });
     },
   });
 }

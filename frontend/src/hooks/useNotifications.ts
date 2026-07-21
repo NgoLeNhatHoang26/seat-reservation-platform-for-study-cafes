@@ -1,13 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../lib/queryKeys';
 import * as notificationService from '../services/notificationService';
 import type {
   GetNotificationsParams,
   NotificationListResponse,
 } from '../types/notification.types';
 
-export const NOTIFICATIONS_QUERY_KEY = ['notifications'] as const;
-
-// staleTime: 0 — notifications should reflect latest unread state
+export { NOTIFICATION_LIST_PARAMS } from '../lib/queryKeys';
 
 export interface UseNotificationsParams extends GetNotificationsParams {
   enabled?: boolean;
@@ -17,7 +16,7 @@ export function useNotificationsList(params: UseNotificationsParams = {}) {
   const { enabled = true, ...queryParams } = params;
 
   return useQuery<NotificationListResponse, Error>({
-    queryKey: [...NOTIFICATIONS_QUERY_KEY, queryParams],
+    queryKey: queryKeys.notifications.list(queryParams),
     queryFn: () => notificationService.getNotifications(queryParams),
     enabled,
     staleTime: 0,
@@ -31,7 +30,7 @@ export function useMarkNotificationRead() {
     mutationFn: (notificationId: string) =>
       notificationService.markNotificationRead(notificationId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
     },
   });
 }

@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { queryClient } from '../lib/queryClient';
 import * as authService from '../services/authService';
 import { setupAuthCallbacks } from '../services/axiosInstance';
 import type {
@@ -67,17 +68,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCustomerProfile(null);
   }, []);
 
+  const clearSession = useCallback(() => {
+    clearAuth();
+    queryClient.clear();
+  }, [clearAuth]);
+
   // Register Axios interceptor callbacks once on mount.
   useEffect(() => {
     setupAuthCallbacks(
       getAccessToken,
       setAccessToken,
       () => {
-        clearAuth();
+        clearSession();
         window.location.href = '/login';
       },
     );
-  }, [getAccessToken, setAccessToken, clearAuth]);
+  }, [getAccessToken, setAccessToken, clearSession]);
 
   useEffect(() => {
     const storedRefresh = localStorage.getItem(REFRESH_TOKEN_KEY);
@@ -103,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setCurrentUser(user);
         setCustomerProfile(profile ?? null);
       } catch {
-        if (!cancelled) clearAuth();
+        if (!cancelled) clearSession();
       } finally {
         if (!cancelled) setIsInitializing(false);
       }
@@ -131,8 +137,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
       }
     }
-    clearAuth();
-  }, [clearAuth]);
+    clearSession();
+  }, [clearSession]);
 
   const register = useCallback(async (payload: RegisterCustomerPayload): Promise<User> => {
     const { tokens } = await authService.register(payload);

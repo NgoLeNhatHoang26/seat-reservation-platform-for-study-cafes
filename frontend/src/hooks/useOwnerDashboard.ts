@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../lib/queryKeys';
 import * as ownerService from '../services/ownerService';
 import type {
   CreateCafePayload,
@@ -8,20 +9,9 @@ import type {
   UpdateCafeSettingsPayload,
 } from '../types/cafe.types';
 
-// All keys nested under ['owner'] for targeted invalidation.
-
-export const ownerKeys = {
-  all: ['owner'] as const,
-  cafes: () => ['owner', 'cafes'] as const,
-  cafe: (cafeId: string) => ['owner', 'cafes', cafeId] as const,
-  layout: (cafeId: string) => ['owner', 'cafes', cafeId, 'layout'] as const,
-  bookings: (cafeId: string, params?: GetOwnerBookingsParams) =>
-    ['owner', 'cafes', cafeId, 'bookings', params ?? {}] as const,
-};
-
 export function useOwnerCafes() {
   return useQuery({
-    queryKey: ownerKeys.cafes(),
+    queryKey: queryKeys.owner.cafes(),
     queryFn: () => ownerService.listOwnerCafes(),
     staleTime: 2 * 60 * 1000,
   });
@@ -29,7 +19,7 @@ export function useOwnerCafes() {
 
 export function useOwnerCafe(cafeId: string) {
   return useQuery({
-    queryKey: ownerKeys.cafe(cafeId),
+    queryKey: queryKeys.owner.cafe(cafeId),
     queryFn: () => ownerService.getOwnerCafe(cafeId),
     staleTime: 2 * 60 * 1000,
     enabled: !!cafeId,
@@ -38,7 +28,7 @@ export function useOwnerCafe(cafeId: string) {
 
 export function useOwnerSeatLayout(cafeId: string) {
   return useQuery({
-    queryKey: ownerKeys.layout(cafeId),
+    queryKey: queryKeys.owner.layout(cafeId),
     queryFn: () => ownerService.getOwnerSeatLayout(cafeId),
     staleTime: 2 * 60 * 1000,
     enabled: !!cafeId,
@@ -50,7 +40,7 @@ export function useOwnerBookings(
   params?: GetOwnerBookingsParams,
 ) {
   return useQuery({
-    queryKey: ownerKeys.bookings(cafeId, params),
+    queryKey: queryKeys.owner.bookings(cafeId, params),
     queryFn: () => ownerService.getOwnerBookings(cafeId, params),
     staleTime: 0,
     enabled: !!cafeId,
@@ -62,7 +52,7 @@ export function useCreateCafe() {
   return useMutation({
     mutationFn: (payload: CreateCafePayload) => ownerService.createCafe(payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ownerKeys.cafes() });
+      qc.invalidateQueries({ queryKey: queryKeys.owner.cafes() });
     },
   });
 }
@@ -73,8 +63,8 @@ export function useUpdateCafe(cafeId: string) {
     mutationFn: (payload: UpdateCafePayload) =>
       ownerService.updateCafe(cafeId, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ownerKeys.cafes() });
-      qc.invalidateQueries({ queryKey: ownerKeys.cafe(cafeId) });
+      qc.invalidateQueries({ queryKey: queryKeys.owner.cafes() });
+      qc.invalidateQueries({ queryKey: queryKeys.owner.cafe(cafeId) });
     },
   });
 }
@@ -85,7 +75,7 @@ export function useUpdateCafeSettings(cafeId: string) {
     mutationFn: (payload: UpdateCafeSettingsPayload) =>
       ownerService.updateCafeSettings(cafeId, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ownerKeys.cafe(cafeId) });
+      qc.invalidateQueries({ queryKey: queryKeys.owner.cafe(cafeId) });
     },
   });
 }
@@ -96,7 +86,7 @@ export function useSaveLayout(cafeId: string) {
     mutationFn: (payload: SaveLayoutPayload) =>
       ownerService.saveLayout(cafeId, payload),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ownerKeys.layout(cafeId) });
+      qc.invalidateQueries({ queryKey: queryKeys.owner.layout(cafeId) });
     },
   });
 }
@@ -107,7 +97,7 @@ export function useOwnerCheckIn(cafeId: string) {
     mutationFn: (bookingId: string) =>
       ownerService.ownerCheckIn(cafeId, bookingId),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ownerKeys.bookings(cafeId) });
+      qc.invalidateQueries({ queryKey: queryKeys.owner.bookingsAll(cafeId) });
     },
   });
 }

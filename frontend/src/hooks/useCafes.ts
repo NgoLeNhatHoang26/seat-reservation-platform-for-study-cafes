@@ -4,9 +4,8 @@ import {
   searchCafes,
   type BrowseCafesParams,
 } from '../services/cafeService';
+import { queryKeys } from '../lib/queryKeys';
 import type { CafeListResponse } from '../types/cafe.types';
-
-export const CAFES_QUERY_KEY = 'cafes';
 
 const STALE_TIME = 5 * 60 * 1000; // 5 min — matches backend café list cache TTL
 
@@ -20,9 +19,10 @@ export interface UseCafesParams {
 export function useCafes(params: UseCafesParams = {}) {
   const { city, amenities, limit = 12, sort } = params;
   const useSearch = Boolean(city);
+  const listParams = { city, amenities, limit, sort };
 
   return useInfiniteQuery<CafeListResponse, Error>({
-    queryKey: [CAFES_QUERY_KEY, { city, amenities, limit, sort }],
+    queryKey: queryKeys.cafes.list(listParams),
     queryFn: ({ pageParam }) => {
       const cursor = pageParam as string | undefined;
       if (useSearch) {

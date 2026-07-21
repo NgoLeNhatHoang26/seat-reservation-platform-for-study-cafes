@@ -1,12 +1,11 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../lib/queryKeys';
 import * as bookingService from '../services/bookingService';
 import type {
   BookingListResponse,
   BookingStatus,
   CreateBookingPayload,
 } from '../types/booking.types';
-
-export const BOOKINGS_QUERY_KEY = 'bookings';
 
 // staleTime: 0 — booking list is user-specific, always refetch on mount
 
@@ -19,9 +18,10 @@ export interface UseBookingsParams {
 
 export function useBookings(params: UseBookingsParams = {}) {
   const { status, upcoming, cafeId, limit = 10 } = params;
+  const listParams = { status, upcoming, cafeId, limit };
 
   return useInfiniteQuery<BookingListResponse, Error>({
-    queryKey: [BOOKINGS_QUERY_KEY, { status, upcoming, cafeId, limit }],
+    queryKey: queryKeys.bookings.list(listParams),
     queryFn: ({ pageParam }) =>
       bookingService.getBookings({
         status,
@@ -56,9 +56,9 @@ export function useCreateBooking() {
     mutationFn: ({ idempotencyKey, ...payload }: CreateBookingVariables) =>
       bookingService.createBooking(payload, idempotencyKey),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: [BOOKINGS_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
       queryClient.invalidateQueries({
-        queryKey: ['cafe', data.cafe.id, 'availability'],
+        queryKey: queryKeys.cafes.availabilityAll(data.cafe.id),
       });
     },
   });
@@ -71,9 +71,9 @@ export function useCancelBooking() {
     mutationFn: ({ bookingId, reason, idempotencyKey }: CancelBookingVariables) =>
       bookingService.cancelBooking(bookingId, reason, idempotencyKey),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: [BOOKINGS_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
       queryClient.invalidateQueries({
-        queryKey: ['cafe', data.booking.cafeId, 'availability'],
+        queryKey: queryKeys.cafes.availabilityAll(data.booking.cafeId),
       });
     },
   });
@@ -85,7 +85,7 @@ export function useCheckIn() {
   return useMutation({
     mutationFn: (bookingId: string) => bookingService.checkIn(bookingId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [BOOKINGS_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.bookings.all });
     },
   });
 }
