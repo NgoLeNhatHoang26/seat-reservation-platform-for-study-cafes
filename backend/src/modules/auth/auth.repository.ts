@@ -73,6 +73,14 @@ export async function findUserById(id: string): Promise<UserWithProfile | null> 
   });
 }
 
+export async function findOwnerProfileByUserId(
+  userId: string,
+): Promise<OwnerProfile | null> {
+  return prisma.ownerProfile.findUnique({
+    where: { userId },
+  });
+}
+
 export async function createUserWithProfile(
   data: CreateUserWithProfileData,
 ): Promise<{ user: User; profile: CustomerProfile }> {

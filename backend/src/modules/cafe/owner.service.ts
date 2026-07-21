@@ -6,6 +6,7 @@ import { BookingStatus, CafeStatus, SeatType } from '../../generated/prisma/enum
 import type { Prisma } from '../../generated/prisma/client';
 import { customAlphabet } from 'nanoid';
 import * as ownerRepo from './owner.repository';
+import * as cafeRepo from './cafe.repository';
 import type { ActiveFutureBooking, OwnerZoneWithSeats } from './owner.repository';
 import * as bookingRepo from '../booking/booking.repository';
 import * as authRepo from '../auth/auth.repository';
@@ -81,10 +82,7 @@ async function assertOwnerCafe(cafeId: string, ownerId: string) {
     const cafe = await ownerRepo.findCafeByIdAndOwner(cafeId, ownerId);
     if (cafe) return cafe;
   
-    const exists = await prisma.cafe.findUnique({
-      where: { id: cafeId },
-      select: { id: true },
-    });
+    const exists = await cafeRepo.findById(cafeId);
     if (!exists) throw new NotFoundError('CAFE_NOT_FOUND');
     throw new ForbiddenError('FORBIDDEN');
 }
@@ -202,7 +200,7 @@ export async function createCafe(ownerId: string, dto: CreateCafeDto) {
           amenities: dto.amenities ?? [],
           coverImageUrl: dto.coverImageUrl ?? null,
           galleryImages: dto.galleryImages ?? [],
-          status: CafeStatus.PENDING_VERIFICATION, // explicit
+          status: CafeStatus.PENDING_VERIFICATION, 
         },
         tx,
       );
@@ -221,7 +219,6 @@ export async function createCafe(ownerId: string, dto: CreateCafeDto) {
       return created;
     });
   
-    // Post-commit — KHÔNG invalidate cafes:list (RF-10: chưa public)
     try {
       await emailQueueProducer.enqueueAdminNewCafePendingEmail(cafe.id, owner.email);
     } catch (e) {
@@ -252,7 +249,6 @@ export async function updateCafe(
           ...(dto.amenities !== undefined ? { amenities: dto.amenities } : {}),
           ...(dto.coverImageUrl !== undefined ? { coverImageUrl: dto.coverImageUrl } : {}),
           ...(dto.galleryImages !== undefined ? { galleryImages: dto.galleryImages } : {}),
-          // KHÔNG cho phép đổi status, ownerId, slug
         },
         tx,
       );
@@ -415,10 +411,10 @@ export async function updateSeatLayout(
     ownerId: string,
     dto: UpdateSeatLayoutDto,
   ) {
-    // 1) Ownership
+    // Ownership
     await assertOwnerCafe(cafeId, ownerId);
   
-    // 2) Validate structure
+    // Validate structure
     validateLayoutDto(dto);
   
     const currentZones = await ownerRepo.findZonesWithSeatsForOwner(cafeId);
@@ -428,12 +424,12 @@ export async function updateSeatLayout(
       assertLayoutIdsBelongToCafe(currentZones, dto);
     }
   
-    // 3) Diff
+    // Diff
     const { removedZoneIds, removedSeatIds } = isCreate
       ? { removedZoneIds: [], removedSeatIds: [] }
       : computeLayoutDiff(currentZones, dto);
   
-    // 4) Conflict check (pre-TX)
+    // Conflict check (pre-TX)
     const affectedBookings = await ownerRepo.findActiveFutureBookingsForSeats(
       removedSeatIds,
     );
@@ -453,7 +449,7 @@ export async function updateSeatLayout(
       );
     }
   
-    // 5–7) Transaction
+    // Transaction
     const cancelledBookings: AffectedBooking[] = [];
   
     await prisma.$transaction(async (tx: Tx) => {
@@ -465,7 +461,7 @@ export async function updateSeatLayout(
         }
       }
   
-      // 7a) Upsert zones + seats
+      // Upsert zones + seats
       for (const zoneDto of dto.zones) {
         const zone = await ownerRepo.upsertZone(
           {
@@ -493,7 +489,7 @@ export async function updateSeatLayout(
         }
       }
   
-      // 7b) Soft-delete removed (KHÔNG hard delete)
+      // Soft-delete removed (KHÔNG hard delete)
       for (const seatId of removedSeatIds) {
         await ownerRepo.softDeleteSeat(seatId, tx);
       }
@@ -501,7 +497,7 @@ export async function updateSeatLayout(
         await ownerRepo.softDeleteZone(zoneId, tx);
       }
   
-      // 7c) Audit
+      // Audit
       await bookingRepo.createAuditLog(
         {
           actorId: ownerId,
@@ -523,7 +519,7 @@ export async function updateSeatLayout(
     const layout = await ownerRepo.findZonesWithSeatsForOwner(cafeId);
     const totalSeats = layout.reduce((n: number, z: OwnerZoneWithSeats) => n + z.seats.length, 0);
   
-    // 8) Post-commit cache (CACHE-DESIGN §7)
+    // Post-commit cache 
     try {
       await cache.deleteFromCache(cache.buildCafeLayoutKey(cafeId));
       await cache.deleteFromCache(cache.buildCafeDetailKey(cafeId));
@@ -532,7 +528,7 @@ export async function updateSeatLayout(
       console.warn('Failed to invalidate layout cache', e);
     }
   
-    // 9) Post-commit cancellation emails (chỉ khi force=true)
+    // Post-commit cancellation emails (chỉ khi force=true)
     if (dto.force) {
       for (const booking of cancelledBookings) {
         try {
@@ -557,7 +553,7 @@ export async function updateSeatLayout(
         removedZones: removedZoneIds.length,
         cancelledBookings: cancelledBookings.length,
       },
-      isCreate, // controller dùng để trả 201 vs 200
+      isCreate,
     };
 }
 
