@@ -1,18 +1,5 @@
-import { emailQueue, bookingQueue } from '../../workers/queue';
-
-export const BOOKING_JOB = {
-  REMINDER: 'BOOKING_REMINDER',
-  AUTO_EXPIRE: 'AUTO_EXPIRE_BOOKING',
-  AUTO_COMPLETE: 'AUTO_COMPLETE_BOOKING',
-} as const;
-export const EMAIL_JOB = {
-  CONFIRMATION: 'BOOKING_CONFIRMATION',
-  CANCELLATION: 'BOOKING_CANCELLATION',
-  ADMIN_NEW_CAFE_PENDING: 'ADMIN_NEW_CAFE_PENDING',
-  REMINDER: 'BOOKING_REMINDER',
-  VERIFICATION: 'SEND_VERIFICATION_EMAIL',
-  SUSPENDED: 'ACCOUNT_SUSPENDED',
-} as const;
+import { bookingQueue } from './queue';
+import { BOOKING_JOB } from './queue-names';
 
 const ONE_MINUTE_MS = 60_000;
 const THIRTY_MINUTES_MS = 30 * ONE_MINUTE_MS;
@@ -39,17 +26,6 @@ function expireJobId(bookingId: string) {
 }
 function completeJobId(bookingId: string) {
   return `${bookingId}:complete`;
-}
-
-export async function enqueueBookingConfirmationEmail(
-  bookingId: string,
-  customerId: string,
-) {
-  await emailQueue.add(
-    EMAIL_JOB.CONFIRMATION,
-    { bookingId, customerId },
-    { delay: 1_000 },
-  );
 }
 
 export async function enqueueBookingReminderJob(
@@ -119,43 +95,8 @@ export async function cancelCompleteJob(bookingId: string) {
   }
 }
 
-export async function enqueueCancellationEmail(
-  bookingId: string,
-  customerId: string,
-  reason?: string,
-) {
-  await emailQueue.add(EMAIL_JOB.CANCELLATION, {
-    bookingId,
-    customerId,
-    ...(reason ? { reason } : {}),
-  });
-}
-
-export async function enqueueAdminNewCafePendingEmail(
-  cafeId: string,
-  ownerEmail: string,
-) {
-  await emailQueue.add(EMAIL_JOB.ADMIN_NEW_CAFE_PENDING, {
-    cafeId,
-    ownerEmail,
-  });
-}
-
-export async function enqueueBookingReminderEmail(bookingId: string) {
-  await emailQueue.add(EMAIL_JOB.REMINDER, { bookingId }, { delay: 0 });
-}
-
-export async function enqueueAccountSuspendedEmail(
-  userId: string,
-  reason: string,
-) {
-  await emailQueue.add(EMAIL_JOB.SUSPENDED, { userId, reason });
-}
-
-export async function enqueueVerificationEmail(
-  userId: string,
-  email: string,
-  token: string,
-) {
-  await emailQueue.add(EMAIL_JOB.VERIFICATION, { userId, email, token });
+export async function cancelAllLifecycleJobs(bookingId: string): Promise<void> {
+  await cancelReminderJob(bookingId);
+  await cancelExpireJob(bookingId);
+  await cancelCompleteJob(bookingId);
 }

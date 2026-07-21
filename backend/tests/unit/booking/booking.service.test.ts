@@ -38,11 +38,14 @@ vi.mock('../../../src/common/cache', () => ({
   deleteByPattern: vi.fn(),
 }));
 
-vi.mock('../../../src/modules/booking/booking-queue.service', () => ({
-  enqueueBookingConfirmationEmail: vi.fn(),
+vi.mock('../../../src/queues/booking-queue.producer', () => ({
   enqueueBookingReminderJob: vi.fn(),
   enqueueAutoExpireJob: vi.fn(),
   enqueueAutoCompleteJob: vi.fn(),
+}));
+
+vi.mock('../../../src/queues/email-queue.producer', () => ({
+  enqueueBookingConfirmationEmail: vi.fn(),
 }));
 
 vi.mock('../../../src/modules/booking/booking.mapper', () => ({

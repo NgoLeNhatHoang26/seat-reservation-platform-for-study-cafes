@@ -8,7 +8,8 @@ import { Prisma } from '../../generated/prisma/client';
 import { customAlphabet } from 'nanoid';
 import { AppError } from '../../common/errors';
 import * as cache from '../../common/cache';
-import * as bookingQueue from './booking-queue.service';
+import * as bookingQueueProducer from '../../queues/booking-queue.producer';
+import * as emailQueueProducer from '../../queues/email-queue.producer';
 import type { CreateBookingDto, BookingResponse, ListBookingsParams } from './booking.dto';
 import { buildCursorPaginationResult } from '../../common/pagination';
 import { toBookingResponse, toBookingListItem } from './booking.mapper';
@@ -310,14 +311,14 @@ export async function createBooking(
   }
 
   try {
-    await bookingQueue.enqueueBookingConfirmationEmail(booking.id, customerId);
-    await bookingQueue.enqueueBookingReminderJob(booking.id, start);
-    await bookingQueue.enqueueAutoExpireJob(
+    await emailQueueProducer.enqueueBookingConfirmationEmail(booking.id, customerId);
+    await bookingQueueProducer.enqueueBookingReminderJob(booking.id, start);
+    await bookingQueueProducer.enqueueAutoExpireJob(
       booking.id,
       start,
       cafe.checkinGraceMinutes,
     );
-    await bookingQueue.enqueueAutoCompleteJob(booking.id, end);
+    await bookingQueueProducer.enqueueAutoCompleteJob(booking.id, end);
   } catch (e) {
     console.warn('Failed to enqueue booking jobs', e);
   }

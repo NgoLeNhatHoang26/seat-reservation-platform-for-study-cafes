@@ -23,7 +23,7 @@ vi.mock('../../../src/modules/cafe/cafe.repository', () => ({
   findById: vi.fn(),
 }));
 
-vi.mock('../../../src/modules/booking/booking-queue.service', () => ({
+vi.mock('../../../src/queues/booking-queue.producer', () => ({
   cancelExpireJob: vi.fn(),
 }));
 

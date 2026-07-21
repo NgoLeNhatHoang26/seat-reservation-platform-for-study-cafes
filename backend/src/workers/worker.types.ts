@@ -1,4 +1,4 @@
-import type { BOOKING_JOB, EMAIL_JOB } from '../modules/booking/booking-queue.service';
+import type { BOOKING_JOB, EMAIL_JOB } from '../queues/queue-names';
 
 export type BookingJobName = (typeof BOOKING_JOB)[keyof typeof BOOKING_JOB];
 export type EmailJobName = (typeof EMAIL_JOB)[keyof typeof EMAIL_JOB];

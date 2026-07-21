@@ -6,7 +6,7 @@ import * as authService from '../../../src/modules/auth/auth.service';
 import * as jwtService from '../../../src/modules/auth/jwt.service';
 import * as passwordService from '../../../src/modules/auth/password.service';
 import * as bookingRepo from '../../../src/modules/booking/booking.repository';
-import * as bookingQueue from '../../../src/modules/booking/booking-queue.service';
+import * as emailQueueProducer from '../../../src/queues/email-queue.producer';
 
 vi.mock('../../../src/modules/auth/auth.repository', () => ({
   findUserByEmail: vi.fn(),
@@ -31,7 +31,7 @@ vi.mock('../../../src/modules/auth/jwt.service', () => ({
   revokeRefreshToken: vi.fn(),
 }));
 
-vi.mock('../../../src/modules/booking/booking-queue.service', () => ({
+vi.mock('../../../src/queues/email-queue.producer', () => ({
   enqueueVerificationEmail: vi.fn(),
   enqueueAdminNewCafePendingEmail: vi.fn(),
 }));
@@ -224,7 +224,7 @@ describe('AuthService', () => {
       fullName: 'Test User',
     });
 
-    expect(bookingQueue.enqueueVerificationEmail).not.toHaveBeenCalled();
+    expect(emailQueueProducer.enqueueVerificationEmail).not.toHaveBeenCalled();
     expect(result.tokens.accessToken).toBe('access-token');
   });
 
@@ -242,7 +242,7 @@ describe('AuthService', () => {
         verificationStatus: OwnerVerificationStatus.PENDING,
       },
     } as never);
-    vi.mocked(bookingQueue.enqueueVerificationEmail).mockResolvedValue(undefined as never);
+    vi.mocked(emailQueueProducer.enqueueVerificationEmail).mockResolvedValue(undefined as never);
 
     const result = await authService.registerOwner({
       email: 'owner@test.com',
@@ -256,7 +256,7 @@ describe('AuthService', () => {
 
     expect(jwtService.signAccessToken).not.toHaveBeenCalled();
     expect(jwtService.signRefreshToken).not.toHaveBeenCalled();
-    expect(bookingQueue.enqueueVerificationEmail).toHaveBeenCalledWith(
+    expect(emailQueueProducer.enqueueVerificationEmail).toHaveBeenCalledWith(
       owner.id,
       owner.email,
       expect.any(String),

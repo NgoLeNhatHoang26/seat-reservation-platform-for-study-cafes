@@ -13,7 +13,7 @@ import type { User } from '../../generated/prisma/client';
 import type { UserWithProfile } from './auth.repository';
 import * as cache from '../../common/cache';
 import * as bookingRepo from '../booking/booking.repository';
-import * as bookingQueue from '../booking/booking-queue.service';
+import * as emailQueueProducer from '../../queues/email-queue.producer';
 import type {
   AuthTokensResponse,
   LoginDto,
@@ -98,7 +98,7 @@ export async function registerCustomer(dto: RegisterCustomerDto) {
 
   const verificationToken = randomUUID();
   await cache.storeEmailVerificationToken(user.id, user.email, verificationToken);
-  await bookingQueue.enqueueVerificationEmail(user.id, user.email, verificationToken);
+  await emailQueueProducer.enqueueVerificationEmail(user.id, user.email, verificationToken);
   const tokens = await issueTokens(user); 
 
   return {
@@ -126,7 +126,7 @@ export async function registerOwner(dto: RegisterOwnerDto) {
   try {
     const verificationToken = randomUUID();
     await cache.storeEmailVerificationToken(user.id, user.email, verificationToken);
-    await bookingQueue.enqueueVerificationEmail(user.id, user.email, verificationToken);
+    await emailQueueProducer.enqueueVerificationEmail(user.id, user.email, verificationToken);
   } catch (error) {
     console.warn('Failed to enqueue verification email', error);
   }
@@ -319,7 +319,7 @@ export async function resendVerificationEmail(
   await cache.storeEmailVerificationToken(user.id, user.email, verificationToken);
 
   try {
-    await bookingQueue.enqueueVerificationEmail(user.id, user.email, verificationToken);
+    await emailQueueProducer.enqueueVerificationEmail(user.id, user.email, verificationToken);
   } catch (error) {
     console.warn('Failed to enqueue verification email', error);
     throw new ConflictError(

@@ -9,7 +9,7 @@ import {
 } from '../../common/errors';
 import * as cafeRepo from '../cafe/cafe.repository';
 import * as bookingRepo from './booking.repository';
-import * as bookingQueue from './booking-queue.service';
+import * as bookingQueueProducer from '../../queues/booking-queue.producer';
 import type { CheckInResponse } from './booking.dto';
 import { toBookingItemResponse } from './booking.mapper';
 
@@ -144,7 +144,7 @@ async function performCheckIn(
   const response = buildCheckInResponse(checkedIn);
 
   try {
-    await bookingQueue.cancelExpireJob(bookingId);
+    await bookingQueueProducer.cancelExpireJob(bookingId);
   } catch (e) {
     console.warn('Failed to cancel expire job after check-in', e);
   }

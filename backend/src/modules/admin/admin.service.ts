@@ -9,7 +9,7 @@ import * as cafeRepo from '../cafe/cafe.repository';
 import * as ownerRepo from '../cafe/owner.repository';
 import type { OwnerZoneWithSeats } from '../cafe/owner.repository';
 import * as bookingRepo from '../booking/booking.repository';
-import * as bookingQueue from '../booking/booking-queue.service';
+import * as emailQueueProducer from '../../queues/email-queue.producer';
 import * as repo from './admin.repository';
 import type {
   AdminUserDetailRow,
@@ -218,7 +218,7 @@ export async function suspendUser(
   await revokeAllUserTokens(targetUserId);
 
   try {
-    await bookingQueue.enqueueAccountSuspendedEmail(targetUserId, reason);
+    await emailQueueProducer.enqueueAccountSuspendedEmail(targetUserId, reason);
   } catch (err) {
     console.warn('[admin.service] failed to enqueue account suspended email', err);
   }
