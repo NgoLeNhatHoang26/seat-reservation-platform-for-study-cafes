@@ -27,10 +27,11 @@ vi.mock('../../../src/common/cache', () => ({
   deleteByPattern: vi.fn(),
 }));
 
-vi.mock('../../../src/modules/booking/booking-queue.service', () => ({
-  cancelReminderJob: vi.fn(),
-  cancelExpireJob: vi.fn(),
-  cancelCompleteJob: vi.fn(),
+vi.mock('../../../src/queues/booking-queue.producer', () => ({
+  cancelAllLifecycleJobs: vi.fn(),
+}));
+
+vi.mock('../../../src/queues/email-queue.producer', () => ({
   enqueueCancellationEmail: vi.fn(),
 }));
 

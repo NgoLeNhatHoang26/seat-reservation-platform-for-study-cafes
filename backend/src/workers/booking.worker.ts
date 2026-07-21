@@ -1,7 +1,8 @@
 import { Job, Worker } from 'bullmq';
 import { env } from '../config/env';
-import { BOOKING_JOB } from '../modules/booking/booking-queue.service';
-import * as bookingQueueService from '../modules/booking/booking-queue.service';
+import { BOOKING_JOB } from '../queues/queue-names';
+import * as bookingQueueProducer from '../queues/booking-queue.producer';
+import * as emailQueueProducer from '../queues/email-queue.producer';
 import * as bookingRepo from '../modules/booking/booking.repository';
 import { BookingStatus } from '../generated/prisma/enums';
 import type {
@@ -15,7 +16,6 @@ import * as cafeRepo from '../modules/cafe/cafe.repository';
 import type { Prisma } from '../generated/prisma/client';
 
 const NO_SHOW_REASON = 'NO_SHOW';
-const EXPIRE_EMAIL_REASON = 'Booking expired due to no check-in';
 const COMPLETE_REASON = 'AUTO_COMPLETE';
 
 const connection = {
@@ -41,7 +41,7 @@ export async function handleBookingReminder(
     return;
   }
 
-  await bookingQueueService.enqueueBookingReminderEmail(booking.id);
+  await emailQueueProducer.enqueueBookingReminderEmail(booking.id);
 }
 
 export async function processBookingJob(job: Job): Promise<void> {
@@ -94,7 +94,7 @@ async function rescheduleExpireJob(
   graceMinutes: number,
 ): Promise<void> {
   try {
-    await bookingQueueService.enqueueAutoExpireJob(
+    await bookingQueueProducer.enqueueAutoExpireJob(
       bookingId,
       startTime,
       graceMinutes,
@@ -112,7 +112,7 @@ async function rescheduleCompleteJob(
   endTime: Date,
 ): Promise<void> {
   try {
-    await bookingQueueService.enqueueAutoCompleteJob(bookingId, endTime);
+    await bookingQueueProducer.enqueueAutoCompleteJob(bookingId, endTime);
   } catch (e) {
     console.warn('[booking.worker] failed to reschedule complete job', {
       bookingId,
@@ -215,11 +215,10 @@ export async function handleAutoExpireBooking(
   }
 
   try {
-    await bookingQueueService.cancelCompleteJob(booking.id);
-    await bookingQueueService.enqueueCancellationEmail(
+    await bookingQueueProducer.cancelCompleteJob(booking.id);
+    await emailQueueProducer.enqueueExpiredBookingEmail(
       booking.id,
       booking.customerId,
-      EXPIRE_EMAIL_REASON,
     );
   } catch (e) {
     // QUEUE-DESIGN: booking vẫn EXPIRED; chỉ log warning

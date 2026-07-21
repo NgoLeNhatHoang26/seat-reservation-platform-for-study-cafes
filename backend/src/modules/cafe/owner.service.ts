@@ -9,7 +9,8 @@ import * as ownerRepo from './owner.repository';
 import type { ActiveFutureBooking, OwnerZoneWithSeats } from './owner.repository';
 import * as bookingRepo from '../booking/booking.repository';
 import * as authRepo from '../auth/auth.repository';
-import * as bookingQueue from '../booking/booking-queue.service';
+import * as bookingQueueProducer from '../../queues/booking-queue.producer';
+import * as emailQueueProducer from '../../queues/email-queue.producer';
 import { toOwnerCafeResponse, toOwnerBookingListItem } from './owner.mapper';
 import * as checkinService from '../booking/checkin.service';
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 6);
@@ -222,7 +223,7 @@ export async function createCafe(ownerId: string, dto: CreateCafeDto) {
   
     // Post-commit — KHÔNG invalidate cafes:list (RF-10: chưa public)
     try {
-      await bookingQueue.enqueueAdminNewCafePendingEmail(cafe.id, owner.email);
+      await emailQueueProducer.enqueueAdminNewCafePendingEmail(cafe.id, owner.email);
     } catch (e) {
       console.warn('Failed to enqueue admin notification', e);
     }
@@ -535,10 +536,8 @@ export async function updateSeatLayout(
     if (dto.force) {
       for (const booking of cancelledBookings) {
         try {
-          await bookingQueue.cancelReminderJob(booking.id);
-          await bookingQueue.cancelExpireJob(booking.id);
-          await bookingQueue.cancelCompleteJob(booking.id);
-          await bookingQueue.enqueueCancellationEmail(
+          await bookingQueueProducer.cancelAllLifecycleJobs(booking.id);
+          await emailQueueProducer.enqueueCancellationEmail(
             booking.id,
             booking.customerId,
             'OWNER_LAYOUT_CHANGE',

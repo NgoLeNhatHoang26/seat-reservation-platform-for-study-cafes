@@ -8,7 +8,8 @@ import {
 import * as cache from '../../common/cache';
 import * as cafeRepo from '../cafe/cafe.repository';
 import * as bookingRepo from './booking.repository';
-import * as bookingQueue from './booking-queue.service';
+import * as bookingQueueProducer from '../../queues/booking-queue.producer';
+import * as emailQueueProducer from '../../queues/email-queue.producer';
 import type { CancelBookingResponse } from './booking.dto';
 import type { Prisma } from '../../generated/prisma/client';
 import { toBookingItemResponse } from './booking.mapper';
@@ -138,10 +139,8 @@ export async function cancelBooking(
   }
 
   try {
-    await bookingQueue.cancelReminderJob(bookingId);
-    await bookingQueue.cancelExpireJob(bookingId);
-    await bookingQueue.cancelCompleteJob(bookingId);
-    await bookingQueue.enqueueCancellationEmail(
+    await bookingQueueProducer.cancelAllLifecycleJobs(bookingId);
+    await emailQueueProducer.enqueueCancellationEmail(
       bookingId,
       customerId,
       reason,

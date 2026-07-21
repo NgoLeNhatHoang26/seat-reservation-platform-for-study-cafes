@@ -4,7 +4,8 @@ import { prisma } from '../../../src/config/prisma';
 import * as cache from '../../../src/common/cache';
 import * as cafeRepo from '../../../src/modules/cafe/cafe.repository';
 import * as bookingRepo from '../../../src/modules/booking/booking.repository';
-import * as bookingQueueService from '../../../src/modules/booking/booking-queue.service';
+import * as bookingQueueProducer from '../../../src/queues/booking-queue.producer';
+import * as emailQueueProducer from '../../../src/queues/email-queue.producer';
 import { handleAutoCompleteBooking, handleAutoExpireBooking } from '../../../src/workers/booking.worker';
 
 vi.mock('../../../src/config/prisma', () => ({
@@ -28,17 +29,16 @@ vi.mock('../../../src/common/cache', () => ({
   deleteByPattern: vi.fn(),
 }));
 
-vi.mock('../../../src/modules/booking/booking-queue.service', () => ({
-  BOOKING_JOB: {
-    REMINDER: 'BOOKING_REMINDER',
-    AUTO_EXPIRE: 'AUTO_EXPIRE_BOOKING',
-    AUTO_COMPLETE: 'AUTO_COMPLETE_BOOKING',
-  },
+vi.mock('../../../src/queues/booking-queue.producer', () => ({
   enqueueAutoExpireJob: vi.fn(),
   enqueueAutoCompleteJob: vi.fn(),
   cancelCompleteJob: vi.fn(),
+}));
+
+vi.mock('../../../src/queues/email-queue.producer', () => ({
   enqueueCancellationEmail: vi.fn(),
   enqueueBookingReminderEmail: vi.fn(),
+  enqueueExpiredBookingEmail: vi.fn(),
 }));
 
 function makeBooking(status: BookingStatus, startTime = new Date('2026-07-09T10:00:00.000Z')) {
@@ -105,10 +105,9 @@ describe('BookingWorker auto-expire', () => {
       expect.anything(),
     );
     expect(cache.deleteByPattern).toHaveBeenCalledWith('availability:cafe-1:*');
-    expect(bookingQueueService.enqueueCancellationEmail).toHaveBeenCalledWith(
+    expect(emailQueueProducer.enqueueExpiredBookingEmail).toHaveBeenCalledWith(
       'booking-1',
       'customer-1',
-      'Booking expired due to no check-in',
     );
   });
 
@@ -119,7 +118,7 @@ describe('BookingWorker auto-expire', () => {
     await handleAutoExpireBooking({ bookingId: 'booking-1' });
 
     expect(bookingRepo.updateBookingStatus).not.toHaveBeenCalled();
-    expect(bookingQueueService.enqueueCancellationEmail).not.toHaveBeenCalled();
+    expect(emailQueueProducer.enqueueExpiredBookingEmail).not.toHaveBeenCalled();
   });
 
   it('reschedules when the expire job fires before the deadline', async () => {
@@ -130,7 +129,7 @@ describe('BookingWorker auto-expire', () => {
     await handleAutoExpireBooking({ bookingId: 'booking-1' });
 
     expect(bookingRepo.updateBookingStatus).not.toHaveBeenCalled();
-    expect(bookingQueueService.enqueueAutoExpireJob).toHaveBeenCalledWith(
+    expect(bookingQueueProducer.enqueueAutoExpireJob).toHaveBeenCalledWith(
       'booking-1',
       booking.startTime,
       15,
@@ -145,7 +144,7 @@ describe('BookingWorker auto-expire', () => {
     await handleAutoExpireBooking({ bookingId: 'booking-1' });
 
     expect(cache.deleteByPattern).not.toHaveBeenCalled();
-    expect(bookingQueueService.enqueueCancellationEmail).not.toHaveBeenCalled();
+    expect(emailQueueProducer.enqueueExpiredBookingEmail).not.toHaveBeenCalled();
   });
 });
 
@@ -199,7 +198,7 @@ describe('BookingWorker auto-complete', () => {
     await handleAutoCompleteBooking({ bookingId: 'booking-1' });
 
     expect(bookingRepo.updateBookingStatus).not.toHaveBeenCalled();
-    expect(bookingQueueService.enqueueAutoCompleteJob).toHaveBeenCalledWith(
+    expect(bookingQueueProducer.enqueueAutoCompleteJob).toHaveBeenCalledWith(
       'booking-1',
       booking.endTime,
     );

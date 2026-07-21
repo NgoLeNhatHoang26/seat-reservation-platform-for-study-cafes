@@ -1,13 +1,14 @@
 import { Job, Worker } from 'bullmq';
 import { env } from '../config/env';
-import { prisma } from '../config/prisma';
 import { sendEmail } from '../common/sendgrid';
-import { EMAIL_JOB } from '../modules/booking/booking-queue.service';
+import { EMAIL_JOB } from '../queues/queue-names';
+import { EXPIRE_EMAIL_REASON } from '../queues/email-queue.producer';
 import * as bookingRepo from '../modules/booking/booking.repository';
 import * as authRepo from '../modules/auth/auth.repository';
 import * as cafeRepo from '../modules/cafe/cafe.repository';
+import * as notificationRepo from '../modules/notification/notification.repository';
+import type { CreateEmailLogInput } from '../modules/notification/notification.repository';
 import {
-  NotificationChannel,
   NotificationStatus,
   NotificationType,
 } from '../generated/prisma/enums';
@@ -24,50 +25,6 @@ const connection = {
   url: env.REDIS_URL,
   maxRetriesPerRequest: null as null,
 };
-
-type LogNotificationInput = {
-  userId: string;
-  bookingId?: string | null;
-  type: NotificationType;
-  status: NotificationStatus;
-  recipient: string;
-  errorMessage?: string | null;
-  sentAt?: Date | null;
-};
-
-async function logNotification(input: LogNotificationInput): Promise<void> {
-  await prisma.notificationLog.create({
-    data: {
-      userId: input.userId,
-      bookingId: input.bookingId ?? null,
-      channel: NotificationChannel.EMAIL,
-      type: input.type,
-      status: input.status,
-      recipient: input.recipient,
-      errorMessage: input.errorMessage ?? null,
-      sentAt: input.sentAt ?? null,
-    },
-  });
-}
-
-/** In-app bell feed — API chỉ đọc channel = IN_APP. */
-async function logInAppNotification(input: {
-  userId: string;
-  bookingId?: string | null;
-  type: NotificationType;
-}): Promise<void> {
-  await prisma.notificationLog.create({
-    data: {
-      userId: input.userId,
-      bookingId: input.bookingId ?? null,
-      channel: NotificationChannel.IN_APP,
-      type: input.type,
-      status: NotificationStatus.SENT,
-      recipient: 'in-app',
-      sentAt: new Date(),
-    },
-  });
-}
 
 function formatDateTime(date: Date): string {
   return date.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
@@ -101,8 +58,10 @@ async function sendAndLog(input: {
   if (input.checkPreference !== false) {
     const allowed = await shouldSendMarketingEmail(input.userId);
     if (!allowed) {
-      await logNotification({
-        ...input,
+      await notificationRepo.createEmailLog({
+        userId: input.userId,
+        bookingId: input.bookingId,
+        type: input.type,
         status: NotificationStatus.SKIPPED,
         recipient: input.to,
         errorMessage: 'User disabled email notifications',
@@ -112,7 +71,7 @@ async function sendAndLog(input: {
   }
   await sendEmail({ to: input.to, subject: input.subject, html: input.html });
 
-  await logNotification({
+  await notificationRepo.createEmailLog({
     userId: input.userId,
     bookingId: input.bookingId,
     type: input.type,
@@ -122,15 +81,13 @@ async function sendAndLog(input: {
   });
 
   if (input.alsoInApp) {
-    await logInAppNotification({
+    await notificationRepo.createInAppLog({
       userId: input.userId,
       bookingId: input.bookingId,
       type: input.type,
     });
   }
 }
-
-const EXPIRE_EMAIL_REASON = 'Booking expired due to no check-in';
 
 function cancellationNotificationType(reason?: string): NotificationType {
   if (reason === EXPIRE_EMAIL_REASON) {
@@ -305,7 +262,7 @@ export async function sendAdminNewCafePendingEmail(
   });
 
   const admin = await authRepo.findUserByEmail(adminEmail);
-  await logNotification({
+  await notificationRepo.createEmailLog({
     userId: admin?.id ?? cafe.ownerId,
     bookingId: null,
     type: NotificationType.EMAIL_VERIFICATION,
@@ -334,7 +291,7 @@ export async function processEmailJob(job: Job): Promise<void> {
   }
 }
 
-async function resolveFailedLogContext(job: Job): Promise<LogNotificationInput | null> {
+async function resolveFailedLogContext(job: Job): Promise<CreateEmailLogInput | null> {
   const data = job.data as Record<string, unknown>;
   const errorMessage = job.failedReason ?? 'Email delivery failed';
 
@@ -416,7 +373,7 @@ export function createEmailWorker(): Worker {
     if (!ctx) return;
 
     try {
-      await logNotification(ctx);
+      await notificationRepo.createEmailLog(ctx);
     } catch (logErr) {
       console.error('[email.worker] failed to write FAILED notification log', logErr);
     }
