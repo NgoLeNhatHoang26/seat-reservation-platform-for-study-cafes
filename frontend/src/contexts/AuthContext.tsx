@@ -135,12 +135,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [clearAuth]);
 
   const register = useCallback(async (payload: RegisterCustomerPayload): Promise<User> => {
-    const { user, tokens } = await authService.register(payload);
+    const { tokens } = await authService.register(payload);
     accessTokenRef.current = tokens.accessToken;
     localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
-    setCurrentUser(user);
-    setCustomerProfile(null);
-    return user;
+
+    const me = await authService.getMe();
+    setCurrentUser(me.user);
+    setCustomerProfile(me.profile ?? null);
+    return me.user;
   }, []);
 
   const registerOwner = useCallback(async (payload: RegisterOwnerPayload): Promise<RegisterOwnerResponse> => {

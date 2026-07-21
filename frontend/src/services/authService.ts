@@ -56,3 +56,18 @@ export async function getMe(): Promise<MeResponse> {
   const { data } = await axiosInstance.get<{ data: MeResponse }>('/auth/me');
   return data.data;
 }
+
+export async function verifyEmail(token: string): Promise<{ message: string }> {
+  const { data } = await axiosInstance.post<{ data: { message: string } }>(
+    '/auth/verify-email',
+    { token },
+  );
+  return data.data;
+}
+
+export async function resendVerificationEmail(): Promise<{ message: string }> {
+  const { data } = await axiosInstance.post<{ data: { message: string } }>(
+    '/auth/resend-verification',
+  );
+  return data.data;
+}

@@ -21,6 +21,12 @@ export function getErrorMessage(errorCode: string | undefined | null): string {
 
     case 'EMAIL_ALREADY_REGISTERED':
       return 'Email này đã được đăng ký.';
+    case 'EMAIL_NOT_VERIFIED':
+      return 'Vui lòng xác minh email trước khi đặt chỗ.';
+    case 'TOKEN_INVALID_OR_EXPIRED':
+      return 'Link xác minh không hợp lệ hoặc đã hết hạn.';
+    case 'EMAIL_DELIVERY_FAILED':
+      return 'Không thể gửi email xác minh. Vui lòng thử lại sau.';
 
     case 'RATE_LIMIT_EXCEEDED':
       return 'Quá nhiều yêu cầu, vui lòng thử lại sau.';

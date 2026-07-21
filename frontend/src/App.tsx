@@ -13,13 +13,14 @@ import CafeDetailPage from './pages/cafe/CafeDetailPage';
 import LandingPage from './pages/LandingPage';
 import OwnerDashboardPage from './pages/owner/OwnerDashboardPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import VerifyEmailPage from './pages/auth/VerifyEmailPage';
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route element={<GuestLayout />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/cafes" element={<BrowseCafesPage />} />

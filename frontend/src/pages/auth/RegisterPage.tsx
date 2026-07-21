@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import AuthPageShell from '../../components/auth/AuthPageShell';
 import VerificationDocumentField from '../../components/auth/VerificationDocumentField';
-import { ROLE_HOME } from '../../contexts/AuthContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
 import {
@@ -62,14 +61,18 @@ function CustomerForm() {
 
   const onSubmit = async (values: RegisterCustomerFormValues) => {
     try {
-      const user = await registerAuth({
+      await registerAuth({
         email: values.email,
         password: values.password,
         fullName: values.fullName,
         phone: values.phone || undefined,
         preferredCity: values.preferredCity || undefined,
       });
-      navigate(ROLE_HOME[user.role], { replace: true });
+      showToast(
+        'Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản trước khi đặt chỗ.',
+        'info',
+      );
+      navigate('/cafes', { replace: true });
     } catch (err) {
       const code = extractErrorCode(err);
 

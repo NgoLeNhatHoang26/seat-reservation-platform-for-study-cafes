@@ -48,6 +48,8 @@ function resolveInlineError(code: string | undefined): string | null {
       return 'Khung giờ không hợp lệ với chính sách quán (slot duration hoặc giờ mở cửa).';
     case 'TIME_SLOT_IN_PAST':
       return 'Không thể đặt chỗ trong quá khứ. Vui lòng chọn thời gian khác.';
+    case 'EMAIL_NOT_VERIFIED':
+      return 'Bạn cần xác minh email trước khi đặt chỗ. Kiểm tra hộp thư hoặc gửi lại email trong trang Cá nhân.';
     default:
       return null;
   }
