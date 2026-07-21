@@ -1,8 +1,54 @@
 import { prisma } from '../../config/prisma';
 import {
   NotificationChannel,
+  NotificationStatus,
   NotificationType,
 } from '../../generated/prisma/enums';
+
+export type CreateEmailLogInput = {
+  userId: string;
+  bookingId?: string | null;
+  type: NotificationType;
+  status: NotificationStatus;
+  recipient: string;
+  errorMessage?: string | null;
+  sentAt?: Date | null;
+};
+
+export type CreateInAppLogInput = {
+  userId: string;
+  bookingId?: string | null;
+  type: NotificationType;
+};
+
+export async function createEmailLog(input: CreateEmailLogInput): Promise<void> {
+  await prisma.notificationLog.create({
+    data: {
+      userId: input.userId,
+      bookingId: input.bookingId ?? null,
+      channel: NotificationChannel.EMAIL,
+      type: input.type,
+      status: input.status,
+      recipient: input.recipient,
+      errorMessage: input.errorMessage ?? null,
+      sentAt: input.sentAt ?? null,
+    },
+  });
+}
+
+export async function createInAppLog(input: CreateInAppLogInput): Promise<void> {
+  await prisma.notificationLog.create({
+    data: {
+      userId: input.userId,
+      bookingId: input.bookingId ?? null,
+      channel: NotificationChannel.IN_APP,
+      type: input.type,
+      status: NotificationStatus.SENT,
+      recipient: 'in-app',
+      sentAt: new Date(),
+    },
+  });
+}
 
 export type FindByUserParams = {
   limit: number;
