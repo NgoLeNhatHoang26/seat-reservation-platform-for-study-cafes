@@ -48,6 +48,13 @@ export const loginRateLimiter = createRateLimiter({
   keyGenerator: ipKey,
 });
 
+export const refreshRateLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,  
+  max: 20,                   
+  keyPrefix: 'refresh',
+  keyGenerator: ipKey,
+});
+
 export const registrationUploadRateLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000,
   max: 20,
