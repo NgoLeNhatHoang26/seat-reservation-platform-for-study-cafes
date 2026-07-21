@@ -7,8 +7,6 @@ import type {
   CreateBookingPayload,
 } from '../types/booking.types';
 
-// staleTime: 0 — booking list is user-specific, always refetch on mount
-
 export interface UseBookingsParams {
   status?: BookingStatus;
   upcoming?: boolean;
